@@ -18,7 +18,6 @@ const PURCHASE_BAR_SPACE = 156;
 export default function ProductDetailPage() {
   const { productId } = useLocalSearchParams<{ productId: string }>();
   const product = getProductById(productId);
-  const [added, setAdded] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [selectedOptionId, setSelectedOptionId] = useState(product?.options[0]?.id);
   const cart = useCart();
@@ -34,6 +33,9 @@ export default function ProductDetailPage() {
   );
   const unitPrice = product ? product.price + (selectedOption?.priceDelta ?? 0) : 0;
   const totalPrice = unitPrice * quantity;
+  const cartLine = cart.lines.find(
+    (line) => line.productId === product?.id && line.optionId === selectedOption?.id
+  );
 
   if (!product) {
     return (
@@ -66,8 +68,13 @@ export default function ProductDetailPage() {
     router.push('/checkout');
   }
 
-  function handleAddToCart() {
+  function handleToggleCart() {
     if (!selectedOptionIdForCart) {
+      return;
+    }
+
+    if (cartLine) {
+      cart.removeItem(cartLine.id);
       return;
     }
 
@@ -76,7 +83,6 @@ export default function ProductDetailPage() {
       productId: productIdForCart,
       quantity,
     });
-    setAdded(true);
   }
 
   return (
@@ -140,11 +146,6 @@ export default function ProductDetailPage() {
           },
         ]}>
         <View style={styles.purchaseContent}>
-          {added && (
-            <AppText color="textSecondary" style={styles.purchaseNotice} variant="caption">
-              장바구니에 담았어요
-            </AppText>
-          )}
           <View style={styles.purchaseTopRow}>
             <AppText color="textSecondary" variant="label">
               수량
@@ -166,8 +167,11 @@ export default function ProductDetailPage() {
             </View>
           </View>
           <View style={styles.actions}>
-            <Button style={styles.secondaryAction} variant="secondary" onPress={handleAddToCart}>
-              장바구니
+            <Button
+              style={styles.secondaryAction}
+              variant={cartLine ? 'destructive' : 'secondary'}
+              onPress={handleToggleCart}>
+              {cartLine ? '장바구니 빼기' : '장바구니 담기'}
             </Button>
             <Button fullWidth style={styles.primaryAction} variant="inverted" onPress={handleBuyNow}>
               {formatKRW(totalPrice)}
@@ -331,9 +335,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.six,
     width: '100%',
   },
-  purchaseNotice: {
-    textAlign: 'right',
-  },
   purchaseTopRow: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -360,7 +361,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   secondaryAction: {
-    minWidth: 104,
+    minWidth: 136,
   },
   section: {
     gap: Spacing.three,
