@@ -1,14 +1,21 @@
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { featuredProducts } from '@/entities/product';
-import { formatKRW } from '@/shared/lib';
+import {
+  categoryLabels,
+  getProductsByCategory,
+  productCategories,
+  ProductCategory,
+} from '@/entities/product';
+import { ProductCard } from '@/entities/product/ui';
 import { Spacing } from '@/constants/theme';
 import { APP_NAME } from '@/shared/config/app';
-import { AppText, Badge, Card, Screen, SearchField } from '@/shared/ui';
-
-const categories = ['전체', '응원봉', '앨범', '의류'];
+import { AppText, Button, Screen, SearchField } from '@/shared/ui';
 
 export default function HomePage() {
+  const [category, setCategory] = useState<ProductCategory>('all');
+  const products = getProductsByCategory(category);
+
   return (
     <Screen>
       <View style={styles.header}>
@@ -18,26 +25,20 @@ export default function HomePage() {
       <SearchField editable={false} placeholder="상품 검색" />
 
       <View style={styles.chipRow}>
-        {categories.map((category, index) => (
-          <Badge key={category} variant={index === 0 ? 'default' : 'secondary'}>
-            {category}
-          </Badge>
+        {productCategories.map((item) => (
+          <Button
+            key={item}
+            size="sm"
+            variant={item === category ? 'primary' : 'secondary'}
+            onPress={() => setCategory(item)}>
+            {categoryLabels[item]}
+          </Button>
         ))}
       </View>
 
       <View style={styles.previewList}>
-        {featuredProducts.map((product) => (
-          <Card
-            key={product.id}
-            style={styles.previewRow}>
-            <View style={styles.productCopy}>
-              <AppText numberOfLines={2} variant="title">
-                {product.name}
-              </AppText>
-              <AppText color="textSecondary">{formatKRW(product.price)}</AppText>
-            </View>
-            <Badge>{product.delivery.badgeLabel}</Badge>
-          </Card>
+        {products.map((product) => (
+          <ProductCard key={product.id} product={product} />
         ))}
       </View>
     </Screen>
@@ -55,16 +56,5 @@ const styles = StyleSheet.create({
   },
   previewList: {
     gap: Spacing.three,
-  },
-  productCopy: {
-    flex: 1,
-    gap: Spacing.one,
-  },
-  previewRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: Spacing.three,
-    justifyContent: 'space-between',
-    minHeight: 72,
   },
 });
