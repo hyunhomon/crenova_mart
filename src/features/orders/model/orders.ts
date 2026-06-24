@@ -2,8 +2,10 @@ import { DeliveryStatus, createMockOrders } from '@/entities/order';
 import { mockProducts } from '@/entities/product';
 import { getStoredPaidOrder } from '@/features/payment/toss/model';
 
-export const orderStatusOptions: { label: string; value: DeliveryStatus }[] = [
-  { label: '배송 중', value: 'shipping' },
+export type OrderStatusFilter = 'active' | 'delivered';
+
+export const orderStatusOptions: { label: string; value: OrderStatusFilter }[] = [
+  { label: '진행 중', value: 'active' },
   { label: '배송 완료', value: 'delivered' },
 ];
 
@@ -18,8 +20,10 @@ export function getOrders() {
   return [paidOrder, ...mockOrders.filter((order) => order.id !== paidOrder.id)];
 }
 
-export function getOrdersByStatus(status: DeliveryStatus) {
-  return getOrders().filter((order) => order.status === status);
+export function getOrdersByStatus(status: OrderStatusFilter) {
+  return getOrders().filter((order) =>
+    status === 'delivered' ? order.status === 'delivered' : order.status !== 'delivered'
+  );
 }
 
 export function getOrderById(orderId: string) {
@@ -30,6 +34,11 @@ export function getStatusBadgeVariant(status: DeliveryStatus) {
   switch (status) {
     case 'delivered':
       return 'success';
+    case 'packed':
+    case 'preparing':
+      return 'secondary';
+    case 'received':
+      return 'warning';
     case 'shipping':
     default:
       return 'default';

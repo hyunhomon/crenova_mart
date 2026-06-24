@@ -4,4 +4,5 @@ export {
   getOrdersByStatus,
   getStatusBadgeVariant,
   orderStatusOptions,
+  type OrderStatusFilter,
 } from './orders';

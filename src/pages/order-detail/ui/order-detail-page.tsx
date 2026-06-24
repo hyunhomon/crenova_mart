@@ -3,7 +3,11 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { formatPaymentMethod } from '@/entities/checkout';
-import { DeliveryStatus, getDeliveryStatusLabel } from '@/entities/order';
+import {
+  deliveryStatusSteps,
+  getDeliveryStatusLabel,
+  isDeliveryStatusReached,
+} from '@/entities/order';
 import { getProductById } from '@/entities/product';
 import { getOrderById, getStatusBadgeVariant } from '@/features/orders/model';
 import { formatKRW } from '@/shared/lib';
@@ -37,14 +41,27 @@ export default function OrderDetailPage() {
       <Card style={styles.section}>
         <AppText variant="label">배송</AppText>
         <View style={styles.timeline}>
-          {(['shipping', 'delivered'] as DeliveryStatus[]).map((item) => (
-            <View key={item} style={styles.timelineRow}>
-              <View style={[styles.timelineDot, item === status && styles.timelineDotActive]} />
-              <AppText color={item === status ? 'text' : 'textSecondary'}>
-                {getDeliveryStatusLabel(item)}
-              </AppText>
-            </View>
-          ))}
+          {deliveryStatusSteps.map((item) => {
+            const reached = isDeliveryStatusReached(status, item);
+            const current = item === status;
+
+            return (
+              <View key={item} style={styles.timelineRow}>
+                <View
+                  style={[
+                    styles.timelineDot,
+                    reached && styles.timelineDotReached,
+                    current && styles.timelineDotActive,
+                  ]}
+                />
+                <AppText
+                  color={reached ? 'text' : 'textSecondary'}
+                  variant={current ? 'label' : 'body'}>
+                  {getDeliveryStatusLabel(item)}
+                </AppText>
+              </View>
+            );
+          })}
         </View>
       </Card>
 
@@ -126,6 +143,9 @@ const styles = StyleSheet.create({
   },
   timelineDotActive: {
     backgroundColor: '#6D3DFF',
+  },
+  timelineDotReached: {
+    backgroundColor: '#8A909C',
   },
   timelineRow: {
     alignItems: 'center',

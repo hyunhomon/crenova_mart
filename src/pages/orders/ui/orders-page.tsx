@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { Link } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { DeliveryStatus, getDeliveryStatusLabel } from '@/entities/order';
+import { formatOrderTitle, getDeliveryStatusLabel } from '@/entities/order';
 import {
   getOrdersByStatus,
   getStatusBadgeVariant,
+  OrderStatusFilter,
   orderStatusOptions,
 } from '@/features/orders/model';
 import { formatKRW } from '@/shared/lib';
@@ -13,7 +14,7 @@ import { Spacing } from '@/constants/theme';
 import { AppText, Badge, Card, Screen, SegmentedControl } from '@/shared/ui';
 
 export default function OrdersPage() {
-  const [status, setStatus] = useState<DeliveryStatus>('shipping');
+  const [status, setStatus] = useState<OrderStatusFilter>('active');
   const orders = getOrdersByStatus(status);
 
   return (
@@ -23,7 +24,7 @@ export default function OrdersPage() {
       <SegmentedControl
         options={orderStatusOptions}
         value={status}
-        onValueChange={(nextStatus) => setStatus(nextStatus as DeliveryStatus)}
+        onValueChange={(nextStatus) => setStatus(nextStatus as OrderStatusFilter)}
       />
 
       {orders.length > 0 ? (
@@ -47,7 +48,7 @@ export default function OrdersPage() {
                     </AppText>
                   </View>
                   <AppText numberOfLines={2} variant="label">
-                    {order.items[0]?.productName}
+                    {formatOrderTitle(order.items)}
                   </AppText>
                   <View style={styles.orderFooter}>
                     <AppText color="textSecondary">{order.items.length}건</AppText>
