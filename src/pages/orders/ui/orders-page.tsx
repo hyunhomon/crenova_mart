@@ -1,27 +1,68 @@
 import { useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { Link } from 'expo-router';
+import { Pressable, StyleSheet, View } from 'react-native';
 
+import { DeliveryStatus, getDeliveryStatusLabel } from '@/entities/order';
+import {
+  getOrdersByStatus,
+  getStatusBadgeVariant,
+  orderStatusOptions,
+} from '@/features/orders/model';
+import { formatKRW } from '@/shared/lib';
 import { Spacing } from '@/constants/theme';
-import { AppText, Card, Screen, SegmentedControl } from '@/shared/ui';
-
-const statuses = [
-  { label: '배송 중', value: 'shipping' },
-  { label: '배송 완료', value: 'delivered' },
-  { label: '완료된 물품', value: 'completed' },
-] as const;
+import { AppText, Badge, Card, Screen, SegmentedControl } from '@/shared/ui';
 
 export default function OrdersPage() {
-  const [status, setStatus] = useState<string>(statuses[0].value);
+  const [status, setStatus] = useState<DeliveryStatus>('shipping');
+  const orders = getOrdersByStatus(status);
 
   return (
     <Screen>
       <AppText variant="h1">주문</AppText>
 
-      <SegmentedControl options={statuses} value={status} onValueChange={setStatus} />
+      <SegmentedControl
+        options={orderStatusOptions}
+        value={status}
+        onValueChange={(nextStatus) => setStatus(nextStatus as DeliveryStatus)}
+      />
 
-      <Card style={styles.emptyState}>
-        <AppText color="textSecondary">주문 내역이 없어요</AppText>
-      </Card>
+      {orders.length > 0 ? (
+        <View style={styles.orderList}>
+          {orders.map((order) => (
+            <Link
+              asChild
+              key={order.id}
+              href={{
+                params: { orderId: order.id },
+                pathname: '/orders/[orderId]',
+              }}>
+              <Pressable style={({ pressed }) => pressed && styles.pressed}>
+                <Card style={styles.orderCard}>
+                  <View style={styles.orderHeader}>
+                    <Badge variant={getStatusBadgeVariant(order.status)}>
+                      {getDeliveryStatusLabel(order.status)}
+                    </Badge>
+                    <AppText color="textSecondary" variant="caption">
+                      {order.orderNumber}
+                    </AppText>
+                  </View>
+                  <AppText numberOfLines={2} variant="label">
+                    {order.items[0]?.productName}
+                  </AppText>
+                  <View style={styles.orderFooter}>
+                    <AppText color="textSecondary">{order.items.length}건</AppText>
+                    <AppText variant="label">{formatKRW(order.payment.totalAmount)}</AppText>
+                  </View>
+                </Card>
+              </Pressable>
+            </Link>
+          ))}
+        </View>
+      ) : (
+        <Card style={styles.emptyState}>
+          <AppText color="textSecondary">주문 내역이 없어요</AppText>
+        </Card>
+      )}
     </Screen>
   );
 }
@@ -32,5 +73,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: 180,
     padding: Spacing.six,
+  },
+  orderCard: {
+    gap: Spacing.three,
+  },
+  orderFooter: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  orderHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: Spacing.two,
+    justifyContent: 'space-between',
+  },
+  orderList: {
+    gap: Spacing.three,
+  },
+  pressed: {
+    opacity: 0.72,
   },
 });
