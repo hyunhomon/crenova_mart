@@ -39,6 +39,35 @@ export function getProductById(productId: string) {
   return mockProducts.find((product) => product.id === productId);
 }
 
+export function getRelatedProducts(productId: string, limit = 6) {
+  const currentProduct = getProductById(productId);
+
+  if (!currentProduct) {
+    return mockProducts.slice(0, limit);
+  }
+
+  return mockProducts
+    .filter((product) => product.id !== productId)
+    .map((product) => {
+      const sharedTagCount = product.tags.filter((tag) => currentProduct.tags.includes(tag)).length;
+      const score =
+        (product.category === currentProduct.category ? 4 : 0) +
+        (product.artist === currentProduct.artist ? 2 : 0) +
+        sharedTagCount;
+
+      return { product, score };
+    })
+    .sort((left, right) => {
+      if (right.score !== left.score) {
+        return right.score - left.score;
+      }
+
+      return right.product.reviewCount - left.product.reviewCount;
+    })
+    .map(({ product }) => product)
+    .slice(0, limit);
+}
+
 export function searchProducts({
   category,
   query,

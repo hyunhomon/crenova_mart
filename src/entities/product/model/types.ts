@@ -35,6 +35,7 @@ export type Product = {
   artist: string;
   category: ProductCategory;
   delivery: DeliveryProfile;
+  description: string;
   id: string;
   imageUrl: string;
   listPrice?: number;

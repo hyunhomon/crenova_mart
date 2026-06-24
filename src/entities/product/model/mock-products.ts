@@ -30,6 +30,8 @@ export const mockProducts: Product[] = [
       fee: 0,
       kind: 'rocket',
     },
+    description:
+      '공연장 이동과 일상 착용에 맞춘 크롭 티셔츠입니다. 부드러운 면 혼방 원단에 투어 로고를 작게 배치했습니다.',
     imageUrl:
       'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=900&q=80',
     name: 'LUMINA 투어 크롭 티셔츠',
@@ -52,6 +54,8 @@ export const mockProducts: Product[] = [
       fee: 0,
       kind: 'rocket',
     },
+    description:
+      '간절기와 실내 대기 시간에 입기 좋은 오버핏 후드 집업입니다. 여유 있는 실루엣과 기본 색상으로 구성했습니다.',
     imageUrl:
       'https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=900&q=80',
     name: 'ATEAM 오버핏 후드 집업',
@@ -74,6 +78,8 @@ export const mockProducts: Product[] = [
       fee: 0,
       kind: 'standard',
     },
+    description:
+      '관람 전후에 나눠 먹기 좋은 스낵 박스입니다. 달콤한 과자와 짭짤한 간식을 한 번에 담았습니다.',
     imageUrl:
       'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=80',
     name: '콘서트 스낵 박스',
@@ -92,6 +98,8 @@ export const mockProducts: Product[] = [
       fee: 0,
       kind: 'rocket',
     },
+    description:
+      '새벽 공연 대기 시간에 바로 먹기 좋게 구성한 컵 과일 세트입니다. 세척과 소분을 마친 과일을 6컵 구성으로 담았습니다.',
     imageUrl:
       'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=900&q=80',
     name: '새벽 응원 과일컵 세트',
@@ -110,6 +118,8 @@ export const mockProducts: Product[] = [
       fee: 3000,
       kind: 'preorder',
     },
+    description:
+      '포스터를 접힘 없이 보관하고 전시할 수 있는 프레임 세트입니다. 얇은 베젤과 투명 커버로 이미지를 또렷하게 보여줍니다.',
     imageUrl:
       'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=900&q=80',
     name: '포스터 프레임 세트',
@@ -128,6 +138,8 @@ export const mockProducts: Product[] = [
       fee: 0,
       kind: 'rocket',
     },
+    description:
+      '공식 앱 연동을 지원하는 블루투스 응원봉입니다. 기본 패키지와 건전지 포함 옵션 중 선택할 수 있습니다.',
     imageUrl:
       'https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=80',
     name: '공식 블루투스 응원봉',
@@ -149,6 +161,8 @@ export const mockProducts: Product[] = [
       fee: 0,
       kind: 'rocket',
     },
+    description:
+      '포토카드와 티켓을 한 번에 정리할 수 있는 슬리브 북입니다. 120매 수납 구성으로 휴대와 보관에 모두 적합합니다.',
     imageUrl:
       'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80',
     name: '포토카드 슬리브 북 120매',
@@ -167,6 +181,8 @@ export const mockProducts: Product[] = [
       fee: 0,
       kind: 'standard',
     },
+    description:
+      '앨범 구성품과 작은 굿즈를 먼지 없이 보관하는 클리어 박스입니다. 쌓아두기 쉬운 3개입 세트입니다.',
     imageUrl:
       'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=80',
     name: '굿즈 보관 클리어 박스',
@@ -185,6 +201,8 @@ export const mockProducts: Product[] = [
       fee: 0,
       kind: 'rocket',
     },
+    description:
+      '무대 조명 아래에서도 색이 선명하게 보이는 립틴트입니다. 로즈와 코랄 두 가지 컬러를 제공합니다.',
     imageUrl:
       'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=900&q=80',
     name: '스테이지 글로우 립틴트',
@@ -206,6 +224,8 @@ export const mockProducts: Product[] = [
       fee: 0,
       kind: 'rocket',
     },
+    description:
+      '야외 대기와 피크닉에 쓰기 좋은 접이식 매트입니다. 가볍게 접히고 바닥 습기를 줄이는 소재를 사용했습니다.',
     imageUrl:
       'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=900&q=80',
     name: '월드투어 피크닉 매트',
@@ -224,6 +244,8 @@ export const mockProducts: Product[] = [
       fee: 0,
       kind: 'standard',
     },
+    description:
+      '이동이 많은 일정에 간편하게 챙길 수 있는 비타민 젤리입니다. 하루 한 포씩 먹기 좋은 30포 구성입니다.',
     imageUrl:
       'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=900&q=80',
     name: '팬미팅 비타민 젤리 30포',
@@ -242,6 +264,8 @@ export const mockProducts: Product[] = [
       fee: 0,
       kind: 'rocket',
     },
+    description:
+      '아이와 함께 응원 룩을 맞출 수 있는 키즈 티셔츠 세트입니다. 움직임이 편한 기본 핏으로 제작했습니다.',
     imageUrl:
       'https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=900&q=80',
     name: '키즈 팬 티셔츠 세트',
@@ -263,6 +287,8 @@ export const mockProducts: Product[] = [
       fee: 0,
       kind: 'rocket',
     },
+    description:
+      '로고가 들어간 스테인리스 텀블러입니다. 공연장 이동 중 음료를 담기 좋은 500ml 용량입니다.',
     imageUrl:
       'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?auto=format&fit=crop&w=900&q=80',
     name: '로고 스테인리스 텀블러',
@@ -281,6 +307,8 @@ export const mockProducts: Product[] = [
       fee: 0,
       kind: 'standard',
     },
+    description:
+      '반려동물과 함께 응원 분위기를 맞출 수 있는 케이프입니다. 목 둘레 조절이 쉬운 S, M 사이즈로 구성했습니다.',
     imageUrl:
       'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=900&q=80',
     name: '펫 응원 케이프',
@@ -302,6 +330,8 @@ export const mockProducts: Product[] = [
       fee: 3000,
       kind: 'preorder',
     },
+    description:
+      '작은 공간에 무대 장면을 연출할 수 있는 블록 키트입니다. 책상 위에 놓기 좋은 미니 사이즈입니다.',
     imageUrl:
       'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=900&q=80',
     name: '미니 무대 블록 키트',
@@ -320,6 +350,8 @@ export const mockProducts: Product[] = [
       fee: 0,
       kind: 'rocket',
     },
+    description:
+      '포토북과 음반을 함께 담은 미니 4집 앨범입니다. 커버 랜덤 또는 2종 세트 옵션을 선택할 수 있습니다.',
     imageUrl:
       'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=900&q=80',
     listPrice: 24200,
