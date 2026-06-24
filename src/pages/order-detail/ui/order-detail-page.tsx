@@ -41,7 +41,7 @@ export default function OrderDetailPage() {
       <Card style={styles.section}>
         <AppText variant="label">배송</AppText>
         <View style={styles.timeline}>
-          {(['shipping', 'delivered', 'completed'] as DeliveryStatus[]).map((item) => (
+          {(['shipping', 'delivered'] as DeliveryStatus[]).map((item) => (
             <View key={item} style={styles.timelineRow}>
               <View style={[styles.timelineDot, item === status && styles.timelineDotActive]} />
               <AppText color={item === status ? 'text' : 'textSecondary'}>
@@ -51,7 +51,7 @@ export default function OrderDetailPage() {
           ))}
         </View>
         <Button
-          disabled={status === 'completed'}
+          disabled={status === 'delivered'}
           variant="secondary"
           onPress={() => setStatus(advanceDeliveryStatus(status))}>
           상태 변경

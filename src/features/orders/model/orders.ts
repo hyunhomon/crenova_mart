@@ -5,7 +5,6 @@ import { getStoredPaidOrder } from '@/features/payment/toss/model';
 export const orderStatusOptions: { label: string; value: DeliveryStatus }[] = [
   { label: '배송 중', value: 'shipping' },
   { label: '배송 완료', value: 'delivered' },
-  { label: '완료된 물품', value: 'completed' },
 ];
 
 export function getOrders() {
@@ -29,10 +28,8 @@ export function getOrderById(orderId: string) {
 
 export function getStatusBadgeVariant(status: DeliveryStatus) {
   switch (status) {
-    case 'completed':
-      return 'success';
     case 'delivered':
-      return 'secondary';
+      return 'success';
     case 'shipping':
     default:
       return 'default';

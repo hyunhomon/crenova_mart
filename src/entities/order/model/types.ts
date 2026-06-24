@@ -1,6 +1,6 @@
 import { PaymentMethod } from '@/entities/checkout';
 
-export type DeliveryStatus = 'shipping' | 'delivered' | 'completed';
+export type DeliveryStatus = 'shipping' | 'delivered';
 
 export type OrderItem = {
   id: string;

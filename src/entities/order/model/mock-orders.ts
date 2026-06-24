@@ -64,7 +64,7 @@ export function createMockOrders(products: Product[]): Order[] {
         method: 'toss-payments-transfer',
         totalAmount: third.price + third.delivery.fee,
       },
-      status: 'completed',
+      status: 'delivered',
     },
   ];
 }
