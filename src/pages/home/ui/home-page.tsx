@@ -1,9 +1,8 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Radius, Spacing } from '@/constants/theme';
 import { APP_NAME } from '@/shared/config/app';
-import { AppText } from '@/shared/ui/app-text';
-import { Screen } from '@/shared/ui/screen';
+import { AppText, Badge, Card, Screen, SearchField } from '@/shared/ui';
 import { useTheme } from '@/hooks/use-theme';
 
 const categories = ['전체', '응원봉', '앨범', '의류'];
@@ -18,47 +17,24 @@ export default function HomePage() {
         <AppText variant="h1">{APP_NAME}</AppText>
       </View>
 
-      <Pressable
-        accessibilityRole="search"
-        style={({ pressed }) => [
-          styles.searchEntry,
-          { backgroundColor: theme.backgroundElement },
-          pressed && { opacity: 0.72 },
-        ]}>
-        <AppText color="textTertiary">상품 검색</AppText>
-      </Pressable>
+      <SearchField editable={false} placeholder="상품 검색" />
 
       <View style={styles.chipRow}>
         {categories.map((category, index) => (
-          <View
-            key={category}
-            style={[
-              styles.chip,
-              {
-                backgroundColor: index === 0 ? theme.brandWeak : theme.backgroundElement,
-              },
-            ]}>
-            <AppText color={index === 0 ? 'brand' : 'textSecondary'} variant="caption">
-              {category}
-            </AppText>
-          </View>
+          <Badge key={category} variant={index === 0 ? 'default' : 'secondary'}>
+            {category}
+          </Badge>
         ))}
       </View>
 
       <View style={styles.previewList}>
         {previewItems.map((item) => (
-          <View
+          <Card
             key={item}
-            style={[
-              styles.previewRow,
-              {
-                backgroundColor: theme.surface,
-                borderColor: theme.line,
-              },
-            ]}>
+            style={styles.previewRow}>
             <AppText variant="title">{item}</AppText>
             <View style={[styles.previewMark, { backgroundColor: theme.brandWeak }]} />
-          </View>
+          </Card>
         ))}
       </View>
     </Screen>
@@ -69,21 +45,10 @@ const styles = StyleSheet.create({
   header: {
     gap: Spacing.two,
   },
-  searchEntry: {
-    borderRadius: Radius.md,
-    justifyContent: 'center',
-    minHeight: 48,
-    paddingHorizontal: Spacing.four,
-  },
   chipRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Spacing.two,
-  },
-  chip: {
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
   },
   previewList: {
     gap: Spacing.three,
@@ -95,11 +60,8 @@ const styles = StyleSheet.create({
   },
   previewRow: {
     alignItems: 'center',
-    borderRadius: Radius.xl,
-    borderWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     minHeight: 72,
-    padding: Spacing.four,
   },
 });
