@@ -1,16 +1,14 @@
 import { StyleSheet, View } from 'react-native';
 
-import { Radius, Spacing } from '@/constants/theme';
+import { featuredProducts } from '@/entities/product';
+import { formatKRW } from '@/shared/lib';
+import { Spacing } from '@/constants/theme';
 import { APP_NAME } from '@/shared/config/app';
 import { AppText, Badge, Card, Screen, SearchField } from '@/shared/ui';
-import { useTheme } from '@/hooks/use-theme';
 
 const categories = ['전체', '응원봉', '앨범', '의류'];
-const previewItems = ['오늘 도착', '무료배송', '팬클럽 특가'];
 
 export default function HomePage() {
-  const theme = useTheme();
-
   return (
     <Screen>
       <View style={styles.header}>
@@ -28,12 +26,17 @@ export default function HomePage() {
       </View>
 
       <View style={styles.previewList}>
-        {previewItems.map((item) => (
+        {featuredProducts.map((product) => (
           <Card
-            key={item}
+            key={product.id}
             style={styles.previewRow}>
-            <AppText variant="title">{item}</AppText>
-            <View style={[styles.previewMark, { backgroundColor: theme.brandWeak }]} />
+            <View style={styles.productCopy}>
+              <AppText numberOfLines={2} variant="title">
+                {product.name}
+              </AppText>
+              <AppText color="textSecondary">{formatKRW(product.price)}</AppText>
+            </View>
+            <Badge>{product.delivery.badgeLabel}</Badge>
           </Card>
         ))}
       </View>
@@ -53,14 +56,14 @@ const styles = StyleSheet.create({
   previewList: {
     gap: Spacing.three,
   },
-  previewMark: {
-    borderRadius: Radius.full,
-    height: 32,
-    width: 32,
+  productCopy: {
+    flex: 1,
+    gap: Spacing.one,
   },
   previewRow: {
     alignItems: 'center',
     flexDirection: 'row',
+    gap: Spacing.three,
     justifyContent: 'space-between',
     minHeight: 72,
   },
