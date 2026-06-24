@@ -31,15 +31,13 @@ export default function SearchPage() {
     () => searchProducts({ category, query, sort }),
     [category, query, sort]
   );
-  const columnCount = width < 560 ? 3 : 4;
+  const columnCount = 3;
   const boundedWidth = Math.max(width, 320);
   const contentWidth = Math.min(boundedWidth, MaxContentWidth) - SCREEN_PADDING * 2 - Spacing.four;
   const itemWidth = (contentWidth - GRID_GAP * (columnCount - 1)) / columnCount;
 
   return (
     <Screen>
-      <AppText variant="h1">검색</AppText>
-
       <SearchField
         placeholder="상품 검색"
         value={query}
@@ -56,7 +54,7 @@ export default function SearchPage() {
               <Button
                 key={keyword}
                 size="sm"
-                variant="secondary"
+                variant="ghost"
                 onPress={() => setQuery(keyword)}>
                 {keyword}
               </Button>
@@ -74,7 +72,7 @@ export default function SearchPage() {
             <Button
               key={item}
               size="sm"
-              variant={item === category ? 'primary' : 'secondary'}
+              variant={item === category ? 'inverted' : 'ghost'}
               onPress={() => setCategory(item)}>
               {categoryLabels[item]}
             </Button>

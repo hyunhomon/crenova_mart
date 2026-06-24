@@ -10,7 +10,7 @@ import {
 
 import { Product } from '@/entities/product/model/types';
 import { formatKRW } from '@/shared/lib';
-import { AppText } from '@/shared/ui';
+import { AppText, Card, CardContent } from '@/shared/ui';
 import { Radius, Spacing } from '@/constants/theme';
 
 type ProductCardProps = {
@@ -28,15 +28,17 @@ export function ProductCard({ product, style }: ProductCardProps) {
           pathname: '/product/[productId]',
         }}>
         <Pressable style={({ pressed }) => [styles.root, pressed && styles.pressed]}>
-          <Image contentFit="cover" source={product.imageUrl} style={styles.image} />
-          <View style={styles.copy}>
-            <AppText numberOfLines={2} style={styles.title} variant="body">
-              {product.name}
-            </AppText>
-            <AppText style={styles.price} variant="label">
-              {formatKRW(product.price)}
-            </AppText>
-          </View>
+          <Card padded={false} style={styles.card} variant="ghost">
+            <Image contentFit="cover" source={product.imageUrl} style={styles.image} />
+            <CardContent style={styles.copy}>
+              <AppText numberOfLines={2} variant="caption">
+                {product.name}
+              </AppText>
+              <AppText style={styles.price} variant="label">
+                {formatKRW(product.price)}
+              </AppText>
+            </CardContent>
+          </Card>
         </Pressable>
       </Link>
     </View>
@@ -44,6 +46,9 @@ export function ProductCard({ product, style }: ProductCardProps) {
 }
 
 const styles = StyleSheet.create({
+  card: {
+    gap: Spacing.two,
+  },
   copy: {
     gap: Spacing.one,
   },
@@ -61,11 +66,6 @@ const styles = StyleSheet.create({
     opacity: 0.72,
   },
   root: {
-    gap: Spacing.two,
     width: '100%',
-  },
-  title: {
-    fontSize: 14,
-    lineHeight: 19,
   },
 });

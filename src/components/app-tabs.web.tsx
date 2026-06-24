@@ -7,12 +7,11 @@ import {
   TabListProps,
 } from 'expo-router/ui';
 import { SymbolView } from 'expo-symbols';
-import { Pressable, StyleSheet, useColorScheme, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
-import { ThemedText } from './themed-text';
-import { ThemedView } from './themed-view';
-
-import { Colors, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
+import { MaxContentWidth, Radius, Spacing } from '@/constants/theme';
+import { AppText, Card } from '@/shared/ui';
+import { useTheme } from '@/hooks/use-theme';
 
 const tabs = [
   {
@@ -85,9 +84,8 @@ export function TabButton({
   isFocused,
   ...props
 }: TabButtonProps) {
-  const scheme = useColorScheme();
-  const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
-  const tintColor = isFocused ? colors.brand : colors.textTertiary;
+  const theme = useTheme();
+  const tintColor = isFocused ? theme.text : theme.textTertiary;
 
   return (
     <Pressable
@@ -99,26 +97,21 @@ export function TabButton({
         tintColor={tintColor}
         weight={isFocused ? 'semibold' : 'regular'}
       />
-      <ThemedView type="background" style={styles.tabLabelView}>
-        <ThemedText type="small" themeColor={isFocused ? 'text' : 'textSecondary'}>
+      <View style={styles.tabLabelView}>
+        <AppText color={isFocused ? 'text' : 'textSecondary'} selectable={false} variant="caption">
           {children}
-        </ThemedText>
-      </ThemedView>
+        </AppText>
+      </View>
     </Pressable>
   );
 }
 
 export function CustomTabList(props: TabListProps) {
-  const scheme = useColorScheme();
-  const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
-
   return (
     <View {...props} style={styles.tabListContainer}>
-      <ThemedView
-        type="backgroundElement"
-        style={[styles.innerContainer, { borderColor: colors.line }]}>
+      <Card padded={false} style={styles.innerContainer} variant="muted">
         {props.children}
-      </ThemedView>
+      </Card>
     </View>
   );
 }
