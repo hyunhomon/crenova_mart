@@ -70,20 +70,29 @@ export function getRelatedProducts(productId: string, limit = 6) {
 
 export function searchProducts({
   category,
+  maxPrice,
+  minPrice,
   query,
-  sort,
+  sort = 'recommended',
 }: {
   category: ProductCategory;
+  maxPrice?: number;
+  minPrice?: number;
   query: string;
-  sort: ProductSort;
+  sort?: ProductSort;
 }) {
   const normalizedQuery = query.trim().toLocaleLowerCase('ko-KR');
   const filteredByCategory = getProductsByCategory(category);
   const filteredByQuery = normalizedQuery
     ? filteredByCategory.filter((product) => isProductMatched(product, normalizedQuery))
     : filteredByCategory;
+  const filteredByPrice = filteredByQuery.filter(
+    (product) =>
+      product.price >= (minPrice ?? 0) &&
+      product.price <= (maxPrice ?? Number.POSITIVE_INFINITY)
+  );
 
-  return sortProducts(filteredByQuery, sort);
+  return sortProducts(filteredByPrice, sort);
 }
 
 function isProductMatched(product: Product, normalizedQuery: string) {
