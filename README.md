@@ -1,56 +1,63 @@
-# Welcome to your Expo app 👋
+# 팬덤&
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Expo SDK 56 기반의 온라인 팬 커머스 목업 앱입니다. 상품 피드, 검색, 상세, 장바구니, 체크아웃, 토스페이먼츠 테스트 결제 redirect, 주문/배송 상태 흐름을 FSD 구조로 구성합니다.
 
-## Get started
+## Stack
 
-1. Install dependencies
+- Expo SDK 56
+- Expo Router
+- React Native 0.85
+- React 19
+- TypeScript
+- shadcn-style React Native primitives under `src/shared/ui`
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Run
 
 ```bash
-npm run reset-project
+bun install
+bun expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Web smoke test:
 
-### Other setup steps
+```bash
+bun expo start --web
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Environment
 
-## Learn more
+토스페이먼츠 결제창 테스트를 실행하려면 공개 테스트 클라이언트 키만 설정합니다. Secret key는 클라이언트 앱에 넣지 않습니다.
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+EXPO_PUBLIC_TOSS_CLIENT_KEY=your_test_client_key
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+키가 없으면 체크아웃 화면에서 결제 버튼을 눌렀을 때 키 필요 상태가 표시됩니다.
 
-## Join the community
+## Verification
 
-Join our community of developers creating universal apps.
+```bash
+bun expo lint
+bunx tsc --noEmit
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Manual flow:
+
+1. 홈에서 상품 선택
+2. 상세에서 장바구니 담기 또는 바로 구매
+3. 장바구니에서 수량 변경, 삭제, 구매하기
+4. 주문서에서 결제하기
+5. 토스 redirect 성공/실패 route 확인
+6. 주문 탭에서 배송 중, 배송 완료, 완료된 물품 확인
+
+## Architecture
+
+```txt
+src/
+  app/       expo-router routes only
+  pages/     route-level page composition
+  widgets/   larger reusable screen blocks
+  features/  user actions and flows
+  entities/  commerce domain models
+  shared/    UI primitives, config, utilities
+```

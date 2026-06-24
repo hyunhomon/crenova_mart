@@ -103,7 +103,7 @@ export default function CheckoutPage() {
         <SummaryRow strong label="결제금액" value={formatKRW(cart.summary.total)} />
       </Card>
 
-      {paymentError && (
+      {Boolean(paymentError) && (
         <AppText color="danger" variant="caption">
           {paymentError}
         </AppText>
