@@ -30,32 +30,28 @@ const accountRows = [
   { icon: LogOut, label: '로그아웃' },
 ] as const;
 
-const businessRows = [
-  ['상호', '팬덤&'],
-  ['대표자', '장원석'],
-  ['사업자등록번호', '187-56-00809'],
-  ['개업연월일', '2024년 09월 09일'],
-  ['사업장 소재지', '대전광역시 서구 계룡로568번길 15-4, 101호(괴정동)'],
-  ['업태', '서비스업'],
-  ['종목', '쇼핑대행'],
+const businessFooterLines = [
+  '팬덤& | 대표 장원석 | 사업자등록번호 187-56-00809',
+  '주소 대전광역시 서구 계룡로568번길 15-4, 101호(괴정동)',
+  '서비스업 | 쇼핑대행',
 ] as const;
 
 export default function ProfilePage() {
   const theme = useTheme();
 
   return (
-    <Screen>
+    <Screen contentContainerStyle={styles.content}>
       <View style={styles.header}>
         <AppText variant="h1">프로필</AppText>
       </View>
 
-      <Card style={styles.identityCard} variant="muted">
-        <View style={styles.identity}>
-          <AppText variant="label">mail@example.com</AppText>
-          <AppText color="textSecondary" variant="caption">
-            서울시 강남구 테헤란로
-          </AppText>
-        </View>
+      <Card padded={false} style={styles.identityCard} variant="ghost">
+        <AppText style={styles.email} variant="title">
+          mail@example.com
+        </AppText>
+        <AppText color="textSecondary" variant="caption">
+          서울시 강남구 테헤란로
+        </AppText>
       </Card>
 
       <Card style={styles.statsCard} variant="muted">
@@ -94,43 +90,31 @@ export default function ProfilePage() {
         ))}
       </Card>
 
-      <Card style={styles.businessCard} variant="muted">
-        <AppText variant="label">사업자 정보</AppText>
-        <View style={styles.businessList}>
-          {businessRows.map(([label, value]) => (
-            <View key={label} style={styles.businessRow}>
-              <AppText color="textTertiary" variant="caption">
-                {label}
-              </AppText>
-              <AppText color="textSecondary" variant="caption">
-                {value}
-              </AppText>
-            </View>
-          ))}
-        </View>
+      <Card padded={false} style={styles.businessFooter} variant="ghost">
+        {businessFooterLines.map((line) => (
+          <AppText key={line} color="textTertiary" style={styles.businessText} variant="caption">
+            {line}
+          </AppText>
+        ))}
       </Card>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
+  content: {
+    gap: Spacing.four,
+  },
+  email: {
+    fontSize: 18,
+    lineHeight: 24,
+  },
   header: {
     gap: Spacing.two,
   },
-  identity: {
-    gap: Spacing.two,
-  },
   identityCard: {
-    gap: Spacing.two,
-  },
-  businessCard: {
-    gap: Spacing.four,
-  },
-  businessList: {
-    gap: Spacing.three,
-  },
-  businessRow: {
-    gap: Spacing.half,
+    gap: Spacing.one,
+    paddingHorizontal: Spacing.two,
   },
   menuCard: {
     gap: Spacing.five,
@@ -167,5 +151,13 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontVariant: ['tabular-nums'],
+  },
+  businessFooter: {
+    gap: Spacing.one,
+    paddingHorizontal: Spacing.two,
+    paddingTop: Spacing.two,
+  },
+  businessText: {
+    lineHeight: 15,
   },
 });
