@@ -54,6 +54,14 @@ export default function AppTabs() {
           sf={{ default: 'shippingbox', selected: 'shippingbox.fill' }}
         />
       </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="profile">
+        <NativeTabs.Trigger.Label>프로필</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
+          md="person"
+          sf={{ default: 'person', selected: 'person.fill' }}
+        />
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }

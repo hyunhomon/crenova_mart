@@ -1,74 +1,71 @@
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  type StyleProp,
+  View,
+  type ViewStyle,
+} from 'react-native';
 
 import { Product } from '@/entities/product/model/types';
 import { formatKRW } from '@/shared/lib';
-import { AppText, Badge, Card } from '@/shared/ui';
+import { AppText } from '@/shared/ui';
 import { Radius, Spacing } from '@/constants/theme';
 
 type ProductCardProps = {
   product: Product;
+  style?: StyleProp<ViewStyle>;
 };
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, style }: ProductCardProps) {
   return (
-    <Link
-      asChild
-      href={{
-        params: { productId: product.id },
-        pathname: '/product/[productId]',
-      }}>
-      <Pressable style={({ pressed }) => pressed && styles.pressed}>
-        <Card style={styles.card}>
+    <View style={style}>
+      <Link
+        asChild
+        href={{
+          params: { productId: product.id },
+          pathname: '/product/[productId]',
+        }}>
+        <Pressable style={({ pressed }) => [styles.root, pressed && styles.pressed]}>
           <Image contentFit="cover" source={product.imageUrl} style={styles.image} />
           <View style={styles.copy}>
-            <View style={styles.header}>
-              <AppText color="textSecondary" numberOfLines={1} variant="caption">
-                {product.artist}
-              </AppText>
-              <AppText numberOfLines={2} variant="title">
-                {product.name}
-              </AppText>
-            </View>
-            <View style={styles.footer}>
-              <AppText variant="label">{formatKRW(product.price)}</AppText>
-              <Badge>{product.delivery.badgeLabel}</Badge>
-            </View>
+            <AppText numberOfLines={2} style={styles.title} variant="body">
+              {product.name}
+            </AppText>
+            <AppText style={styles.price} variant="label">
+              {formatKRW(product.price)}
+            </AppText>
           </View>
-        </Card>
-      </Pressable>
-    </Link>
+        </Pressable>
+      </Link>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: Spacing.four,
-  },
   copy: {
-    flex: 1,
-    gap: Spacing.four,
-  },
-  footer: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.two,
-    justifyContent: 'space-between',
-  },
-  header: {
     gap: Spacing.one,
   },
   image: {
-    aspectRatio: 1,
+    aspectRatio: 0.74,
     backgroundColor: '#ECE8FF',
-    borderRadius: Radius.lg,
-    width: 92,
+    borderCurve: 'continuous',
+    borderRadius: Radius.sm,
+    width: '100%',
+  },
+  price: {
+    fontVariant: ['tabular-nums'],
   },
   pressed: {
     opacity: 0.72,
+  },
+  root: {
+    gap: Spacing.two,
+    width: '100%',
+  },
+  title: {
+    fontSize: 14,
+    lineHeight: 19,
   },
 });

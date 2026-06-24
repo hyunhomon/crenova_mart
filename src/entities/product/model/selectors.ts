@@ -2,12 +2,23 @@ import { mockProducts } from './mock-products';
 import { Product, ProductCategory, ProductSort } from './types';
 
 export const categoryLabels: Record<ProductCategory, string> = {
-  album: '앨범',
   all: '전체',
-  apparel: '의류',
-  goods: '굿즈',
-  'light-stick': '응원봉',
-  'photo-card': '포토카드',
+  baby: '출산/유아동',
+  beauty: '뷰티',
+  'books-music': '도서/음반/DVD',
+  'daily-goods': '생활용품',
+  electronics: '가전디지털',
+  food: '식품',
+  'fresh-food': '신선식품',
+  health: '헬스/건강식품',
+  'home-interior': '홈인테리어',
+  kitchen: '주방용품',
+  'men-fashion': '남성패션',
+  office: '문구/오피스',
+  pets: '반려동물용품',
+  sports: '스포츠/레저',
+  'toys-hobbies': '완구/취미',
+  'women-fashion': '여성패션',
 };
 
 export const sortLabels: Record<ProductSort, string> = {

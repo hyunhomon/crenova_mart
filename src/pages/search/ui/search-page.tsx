@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import {
   categoryLabels,
@@ -10,10 +10,12 @@ import {
   sortLabels,
 } from '@/entities/product';
 import { ProductCard } from '@/entities/product/ui';
-import { Spacing } from '@/constants/theme';
+import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { AppText, Button, Card, Screen, SearchField, SegmentedControl } from '@/shared/ui';
 
 const recentSearches = ['응원봉', '포토카드', '후드'];
+const GRID_GAP = Spacing.three;
+const SCREEN_PADDING = Spacing.six;
 const sortOptions: { label: string; value: ProductSort }[] = [
   { label: sortLabels.recommended, value: 'recommended' },
   { label: sortLabels['price-low'], value: 'price-low' },
@@ -21,6 +23,7 @@ const sortOptions: { label: string; value: ProductSort }[] = [
 ];
 
 export default function SearchPage() {
+  const { width } = useWindowDimensions();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<ProductCategory>('all');
   const [sort, setSort] = useState<ProductSort>('recommended');
@@ -28,6 +31,10 @@ export default function SearchPage() {
     () => searchProducts({ category, query, sort }),
     [category, query, sort]
   );
+  const columnCount = width < 560 ? 3 : 4;
+  const boundedWidth = Math.max(width, 320);
+  const contentWidth = Math.min(boundedWidth, MaxContentWidth) - SCREEN_PADDING * 2 - Spacing.four;
+  const itemWidth = (contentWidth - GRID_GAP * (columnCount - 1)) / columnCount;
 
   return (
     <Screen>
@@ -83,7 +90,9 @@ export default function SearchPage() {
 
       <View style={styles.results}>
         {products.length > 0 ? (
-          products.map((product) => <ProductCard key={product.id} product={product} />)
+          products.map((product) => (
+            <ProductCard key={product.id} product={product} style={{ width: itemWidth }} />
+          ))
         ) : (
           <Card style={styles.emptyState}>
             <AppText color="textSecondary">검색 결과가 없어요</AppText>
@@ -110,6 +119,8 @@ const styles = StyleSheet.create({
     padding: Spacing.six,
   },
   results: {
-    gap: Spacing.three,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: GRID_GAP,
   },
 });

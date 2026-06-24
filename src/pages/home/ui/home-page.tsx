@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Link } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import {
   categoryLabels,
@@ -8,37 +10,75 @@ import {
   ProductCategory,
 } from '@/entities/product';
 import { ProductCard } from '@/entities/product/ui';
-import { Spacing } from '@/constants/theme';
+import { MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { APP_NAME } from '@/shared/config/app';
-import { AppText, Button, Screen, SearchField } from '@/shared/ui';
+import { AppText, Screen } from '@/shared/ui';
+import { useTheme } from '@/hooks/use-theme';
+
+const GRID_GAP = Spacing.three;
+const SCREEN_PADDING = Spacing.four;
 
 export default function HomePage() {
+  const { width } = useWindowDimensions();
+  const theme = useTheme();
   const [category, setCategory] = useState<ProductCategory>('all');
   const products = getProductsByCategory(category);
+  const columnCount = width < 560 ? 3 : 4;
+  const boundedWidth = Math.max(width, 320);
+  const contentWidth = Math.min(boundedWidth, MaxContentWidth) - SCREEN_PADDING * 2 - Spacing.four;
+  const itemWidth = (contentWidth - GRID_GAP * (columnCount - 1)) / columnCount;
 
   return (
-    <Screen>
+    <Screen contentContainerStyle={styles.content}>
       <View style={styles.header}>
-        <AppText variant="h1">{APP_NAME}</AppText>
+        <AppText selectable={false} style={styles.brand} variant="h1">
+          {APP_NAME}
+        </AppText>
+        <Link href="/search" asChild>
+          <Pressable
+            accessibilityLabel="검색"
+            style={({ pressed }) => [
+              styles.searchButton,
+              { borderColor: theme.line },
+              pressed && styles.pressed,
+            ]}>
+            <SymbolView
+              name={{ android: 'search', ios: 'magnifyingglass', web: 'search' }}
+              size={24}
+              tintColor={theme.text}
+            />
+          </Pressable>
+        </Link>
       </View>
 
-      <SearchField editable={false} placeholder="상품 검색" />
-
-      <View style={styles.chipRow}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.railContent}
+        style={styles.rail}>
         {productCategories.map((item) => (
-          <Button
+          <Pressable
             key={item}
-            size="sm"
-            variant={item === category ? 'primary' : 'secondary'}
+            style={[
+              styles.railTab,
+              item === category && {
+                borderBottomColor: theme.brand,
+              },
+            ]}
             onPress={() => setCategory(item)}>
-            {categoryLabels[item]}
-          </Button>
+            <AppText
+              color={item === category ? 'text' : 'textTertiary'}
+              selectable={false}
+              variant="label">
+              {categoryLabels[item]}
+            </AppText>
+          </Pressable>
         ))}
-      </View>
+      </ScrollView>
 
-      <View style={styles.previewList}>
+      <View style={styles.feed}>
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard key={product.id} product={product} style={{ width: itemWidth }} />
         ))}
       </View>
     </Screen>
@@ -46,15 +86,49 @@ export default function HomePage() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    gap: Spacing.two,
+  brand: {
+    fontSize: 30,
+    lineHeight: 38,
   },
-  chipRow: {
+  content: {
+    gap: Spacing.four,
+    paddingHorizontal: SCREEN_PADDING,
+    paddingTop: Spacing.five,
+  },
+  feed: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.two,
+    gap: GRID_GAP,
   },
-  previewList: {
-    gap: Spacing.three,
+  header: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  pressed: {
+    opacity: 0.72,
+  },
+  rail: {
+    marginHorizontal: -SCREEN_PADDING,
+  },
+  railContent: {
+    flexDirection: 'row',
+    gap: Spacing.five,
+    paddingHorizontal: SCREEN_PADDING,
+  },
+  railTab: {
+    borderBottomColor: 'transparent',
+    borderBottomWidth: 2,
+    minHeight: 44,
+    justifyContent: 'center',
+  },
+  searchButton: {
+    alignItems: 'center',
+    aspectRatio: 1,
+    borderCurve: 'continuous',
+    borderRadius: Radius.full,
+    borderWidth: 1,
+    justifyContent: 'center',
+    width: 44,
   },
 });
