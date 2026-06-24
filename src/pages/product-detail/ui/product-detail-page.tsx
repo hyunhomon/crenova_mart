@@ -116,6 +116,12 @@ export default function ProductDetailPage() {
             상품 설명
           </AppText>
           <AppText color="textSecondary">{product.description}</AppText>
+          <View style={[styles.deliveryFeeRow, { borderTopColor: theme.line }]}>
+            <AppText color="textTertiary">배송비</AppText>
+            <AppText color="textSecondary" variant="label">
+              {formatDeliveryFee(product.delivery.fee)}
+            </AppText>
+          </View>
         </View>
 
         <View style={styles.section}>
@@ -181,6 +187,10 @@ export default function ProductDetailPage() {
       </View>
     </View>
   );
+}
+
+function formatDeliveryFee(fee: number) {
+  return fee <= 0 ? '무료' : formatKRW(fee);
 }
 
 function OptionDropdown({
@@ -270,6 +280,13 @@ const styles = StyleSheet.create({
   deliveryRow: {
     alignItems: 'center',
     flexDirection: 'row',
+  },
+  deliveryFeeRow: {
+    alignItems: 'center',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: Spacing.three,
   },
   dropdownIcon: {
     alignItems: 'center',
