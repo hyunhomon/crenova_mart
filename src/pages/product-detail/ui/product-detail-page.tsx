@@ -116,12 +116,15 @@ export default function ProductDetailPage() {
             상품 설명
           </AppText>
           <AppText color="textSecondary">{product.description}</AppText>
-          <View style={[styles.deliveryFeeRow, { borderTopColor: theme.line }]}>
-            <AppText color="textTertiary">배송비</AppText>
-            <AppText color="textSecondary" variant="label">
-              {formatDeliveryFee(product.delivery.fee)}
-            </AppText>
-          </View>
+        </View>
+
+        <View style={styles.section}>
+          <AppText color="textSecondary" variant="label">
+            배송비
+          </AppText>
+          <AppText style={styles.deliveryFeeValue} variant="title">
+            {formatDeliveryFee(product.delivery.fee)}
+          </AppText>
         </View>
 
         <View style={styles.section}>
@@ -281,12 +284,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
   },
-  deliveryFeeRow: {
-    alignItems: 'center',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingTop: Spacing.three,
+  deliveryFeeValue: {
+    fontVariant: ['tabular-nums'],
   },
   dropdownIcon: {
     alignItems: 'center',
