@@ -1,8 +1,14 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { useCart } from '@/features/cart/model';
+import {
+  buildTossOrderName,
+  getTossClientKey,
+  requestTossCardPayment,
+} from '@/features/payment/toss/model';
 import { formatKRW } from '@/shared/lib';
 import { Radius, Spacing } from '@/constants/theme';
 import { AppText, Button, Card, Screen } from '@/shared/ui';
@@ -16,6 +22,8 @@ const shippingAddress = {
 
 export default function CheckoutPage() {
   const cart = useCart();
+  const [paymentError, setPaymentError] = useState('');
+  const [isPaymentLoading, setPaymentLoading] = useState(false);
 
   if (cart.items.length === 0) {
     return (
@@ -29,6 +37,30 @@ export default function CheckoutPage() {
         </Card>
       </Screen>
     );
+  }
+
+  async function handleRequestPayment() {
+    const clientKey = getTossClientKey();
+
+    if (!clientKey) {
+      setPaymentError('토스 테스트 키가 필요해요');
+      return;
+    }
+
+    setPaymentError('');
+    setPaymentLoading(true);
+
+    try {
+      await requestTossCardPayment({
+        amount: cart.summary.total,
+        clientKey,
+        items: cart.items,
+        orderName: buildTossOrderName(cart.items),
+      });
+    } catch (error) {
+      setPaymentError(error instanceof Error ? error.message : '결제를 시작하지 못했어요');
+      setPaymentLoading(false);
+    }
   }
 
   return (
@@ -71,8 +103,14 @@ export default function CheckoutPage() {
         <SummaryRow strong label="결제금액" value={formatKRW(cart.summary.total)} />
       </Card>
 
-      <Button fullWidth size="lg">
-        결제하기
+      {paymentError && (
+        <AppText color="danger" variant="caption">
+          {paymentError}
+        </AppText>
+      )}
+
+      <Button fullWidth disabled={isPaymentLoading} size="lg" onPress={handleRequestPayment}>
+        {isPaymentLoading ? '결제 중' : '결제하기'}
       </Button>
     </Screen>
   );
