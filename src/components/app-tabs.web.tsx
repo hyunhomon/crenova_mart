@@ -6,46 +6,56 @@ import {
   TabTriggerSlotProps,
   TabListProps,
 } from 'expo-router/ui';
-import { SymbolView } from 'expo-symbols';
+import {
+  House,
+  PackageCheck,
+  Search,
+  ShoppingCart,
+  UserRound,
+} from 'lucide-react-native';
+import { type ComponentType } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { MaxContentWidth, Radius, Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { AppText, Card } from '@/shared/ui';
 import { useTheme } from '@/hooks/use-theme';
+
+type TabIcon = ComponentType<{
+  color?: string;
+  fill?: string;
+  fillOpacity?: number;
+  size?: number;
+  strokeWidth?: number;
+}>;
 
 const tabs = [
   {
     href: '/',
-    icon: { android: 'home', ios: 'house', web: 'home' },
-    iconSelected: { android: 'home', ios: 'house.fill', web: 'home' },
+    icon: House,
     label: '홈',
     name: 'home',
   },
   {
     href: '/search',
-    icon: { android: 'search', ios: 'magnifyingglass', web: 'search' },
-    iconSelected: { android: 'search', ios: 'magnifyingglass', web: 'search' },
+    icon: Search,
     label: '검색',
     name: 'search',
   },
   {
     href: '/cart',
-    icon: { android: 'shopping_cart', ios: 'cart', web: 'shopping_cart' },
-    iconSelected: { android: 'shopping_cart', ios: 'cart.fill', web: 'shopping_cart' },
+    icon: ShoppingCart,
     label: '장바구니',
     name: 'cart',
   },
   {
     href: '/orders',
-    icon: { android: 'local_shipping', ios: 'shippingbox', web: 'local_shipping' },
-    iconSelected: { android: 'local_shipping', ios: 'shippingbox.fill', web: 'local_shipping' },
+    icon: PackageCheck,
     label: '주문',
     name: 'orders',
   },
   {
     href: '/profile',
-    icon: { android: 'person', ios: 'person', web: 'person' },
-    iconSelected: { android: 'person', ios: 'person.fill', web: 'person' },
+    icon: UserRound,
     label: '프로필',
     name: 'profile',
   },
@@ -59,7 +69,7 @@ export default function AppTabs() {
         <CustomTabList>
           {tabs.map((item) => (
             <TabTrigger key={item.name} name={item.name} href={item.href} asChild>
-              <TabButton icon={item.icon} iconSelected={item.iconSelected}>
+              <TabButton icon={item.icon}>
                 {item.label}
               </TabButton>
             </TabTrigger>
@@ -70,32 +80,31 @@ export default function AppTabs() {
   );
 }
 
-type TabIconName = (typeof tabs)[number]['icon'] | (typeof tabs)[number]['iconSelected'];
-
 type TabButtonProps = TabTriggerSlotProps & {
-  icon: TabIconName;
-  iconSelected: TabIconName;
+  icon: TabIcon;
 };
 
 export function TabButton({
   children,
   icon,
-  iconSelected,
   isFocused,
   ...props
 }: TabButtonProps) {
   const theme = useTheme();
+  const Icon = icon;
   const tintColor = isFocused ? theme.text : theme.textTertiary;
+  const fillColor = isFocused ? theme.text : theme.textTertiary;
 
   return (
     <Pressable
       {...props}
       style={({ pressed }) => [styles.tabButton, pressed && styles.pressed]}>
-      <SymbolView
-        name={isFocused ? iconSelected : icon}
+      <Icon
+        color={tintColor}
+        fill={fillColor}
+        fillOpacity={isFocused ? 0.22 : 0.1}
         size={22}
-        tintColor={tintColor}
-        weight={isFocused ? 'semibold' : 'regular'}
+        strokeWidth={isFocused ? 2.6 : 2.2}
       />
       <View style={styles.tabLabelView}>
         <AppText color={isFocused ? 'text' : 'textSecondary'} selectable={false} variant="caption">
@@ -123,27 +132,27 @@ const styles = StyleSheet.create({
   tabListContainer: {
     position: 'absolute',
     bottom: 0,
+    left: 0,
+    right: 0,
     width: '100%',
-    paddingBottom: Spacing.three,
-    paddingHorizontal: Spacing.three,
-    paddingTop: Spacing.two,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
   },
   innerContainer: {
-    minHeight: 72,
-    paddingBottom: Spacing.two,
-    paddingHorizontal: Spacing.one,
+    minHeight: 78,
+    paddingBottom: Spacing.three,
+    paddingHorizontal: Spacing.two,
     paddingTop: Spacing.two,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
+    borderRadius: 0,
+    borderWidth: 0,
+    borderTopWidth: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
     flexGrow: 1,
     gap: Spacing.one,
-    maxWidth: MaxContentWidth,
+    width: '100%',
   },
   pressed: {
     opacity: 0.7,
