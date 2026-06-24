@@ -1,6 +1,6 @@
-import { router, useLocalSearchParams } from 'expo-router';
-import { useMemo } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useMemo, useRef } from 'react';
+import { StyleSheet, useWindowDimensions, View, type TextInput } from 'react-native';
 
 import {
   categoryLabels,
@@ -18,9 +18,10 @@ const RECOMMENDED_PRODUCT_LIMIT = 12;
 const SCREEN_PADDING = Spacing.six;
 
 export default function SearchPage() {
-  const params = useLocalSearchParams<{ query?: string }>();
+  const params = useLocalSearchParams<{ focus?: string; query?: string }>();
   const { width } = useWindowDimensions();
   const query = params.query ?? '';
+  const searchInputRef = useRef<TextInput>(null);
   const products = useMemo(
     () => searchProducts({ category: 'all', query: '' }).slice(0, RECOMMENDED_PRODUCT_LIMIT),
     []
@@ -29,6 +30,18 @@ export default function SearchPage() {
   const boundedWidth = Math.max(width, 320);
   const contentWidth = Math.min(boundedWidth, MaxContentWidth) - SCREEN_PADDING * 2 - Spacing.four;
   const itemWidth = (contentWidth - GRID_GAP * (columnCount - 1)) / columnCount;
+
+  useFocusEffect(
+    useCallback(() => {
+      if (params.focus !== '1') {
+        return;
+      }
+
+      requestAnimationFrame(() => {
+        searchInputRef.current?.focus();
+      });
+    }, [params.focus])
+  );
 
   function openSearchDetail(nextCategory: ProductCategory, nextQuery = query) {
     router.push({
@@ -47,6 +60,7 @@ export default function SearchPage() {
   return (
     <Screen preserveScroll>
       <SearchField
+        ref={searchInputRef}
         placeholder="상품 검색"
         value={query}
         onChangeText={updateQuery}

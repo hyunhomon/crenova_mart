@@ -14,7 +14,7 @@ import {
   searchProducts,
 } from '@/entities/product';
 import { ProductCard } from '@/entities/product/ui';
-import { MaxContentWidth, Radius, Spacing } from '@/constants/theme';
+import { BottomTabInset, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { formatKRW } from '@/shared/lib';
 import { AppText, Button, Card, Screen, SearchField, TextField } from '@/shared/ui';
@@ -25,8 +25,8 @@ const PRICE_MIN = 0;
 const SCREEN_PADDING = Spacing.six;
 
 type PriceRange = {
-  max: number;
-  min: number;
+  max?: number;
+  min?: number;
 };
 
 type PriceInputValues = {
@@ -76,29 +76,43 @@ export default function SearchDetailPage() {
 
   function applyFilters() {
     const nextPriceRange = normalizePriceRange({
-      max: parsePriceInput(draftPriceInputs.max, PRICE_MAX),
-      min: parsePriceInput(draftPriceInputs.min, PRICE_MIN),
+      max: parsePriceInput(draftPriceInputs.max),
+      min: parsePriceInput(draftPriceInputs.min),
     });
+    const nextParams: {
+      category: ProductCategory;
+      maxPrice?: string;
+      minPrice?: string;
+      query: string;
+    } = {
+      category: draftCategory,
+      query,
+    };
+
+    if (nextPriceRange.max !== undefined) {
+      nextParams.maxPrice = String(nextPriceRange.max);
+    }
+
+    if (nextPriceRange.min !== undefined) {
+      nextParams.minPrice = String(nextPriceRange.min);
+    }
 
     setCategory(draftCategory);
     setPriceRange(nextPriceRange);
     setSheetOpen(false);
     router.replace({
       pathname: '/search-detail/[category]',
-      params: {
-        category: draftCategory,
-        maxPrice: String(nextPriceRange.max),
-        minPrice: String(nextPriceRange.min),
-        query,
-      },
+      params: nextParams,
     });
   }
 
   function resetFilters() {
-    const defaultPriceRange = { max: PRICE_MAX, min: PRICE_MIN };
-
     setDraftCategory('all');
-    setDraftPriceInputs(toPriceInputValues(defaultPriceRange));
+    resetDraftPriceRange();
+  }
+
+  function resetDraftPriceRange() {
+    setDraftPriceInputs(toPriceInputValues({}));
   }
 
   function updateDraftPriceInput(field: keyof PriceInputValues, value: string) {
@@ -113,7 +127,7 @@ export default function SearchDetailPage() {
   function openSearchHome() {
     router.replace({
       pathname: '/search',
-      params: { query },
+      params: { focus: '1', query },
     });
   }
 
@@ -185,9 +199,16 @@ export default function SearchDetailPage() {
             </View>
 
             <View style={styles.sheetSection}>
-              <AppText color="textSecondary" variant="label">
-                가격 범위
-              </AppText>
+              <View style={styles.sheetSectionHeader}>
+                <AppText color="textSecondary" variant="label">
+                  가격 범위
+                </AppText>
+                <Pressable accessibilityRole="button" onPress={resetDraftPriceRange}>
+                  <AppText color="textTertiary" selectable={false} variant="caption">
+                    가격 범위 초기화
+                  </AppText>
+                </Pressable>
+              </View>
               <PriceRangeInputs
                 maxValue={draftPriceInputs.max}
                 minValue={draftPriceInputs.min}
@@ -260,6 +281,18 @@ function PriceRangeInputs({
 }
 
 function formatPriceRange(range: PriceRange) {
+  if (range.min === undefined && range.max === undefined) {
+    return '가격 제한 없음';
+  }
+
+  if (range.min === undefined) {
+    return `${formatKRW(range.max ?? PRICE_MAX)} 이하`;
+  }
+
+  if (range.max === undefined) {
+    return `${formatKRW(range.min)} 이상`;
+  }
+
   return `${formatKRW(range.min)} - ${formatKRW(range.max)}`;
 }
 
@@ -271,27 +304,34 @@ function parseCategory(category?: string): ProductCategory {
 
 function parsePriceRange(minPrice?: string, maxPrice?: string): PriceRange {
   return normalizePriceRange({
-    max: parsePriceParam(maxPrice, PRICE_MAX),
-    min: parsePriceParam(minPrice, PRICE_MIN),
+    max: parsePriceParam(maxPrice),
+    min: parsePriceParam(minPrice),
   });
 }
 
-function parsePriceParam(value: string | undefined, fallback: number) {
-  return parsePriceInput(value ?? '', fallback);
+function parsePriceParam(value: string | undefined) {
+  return parsePriceInput(value ?? '');
 }
 
-function parsePriceInput(value: string, fallback: number) {
+function parsePriceInput(value: string) {
   const sanitized = sanitizePriceInput(value);
   const price = Number(sanitized);
 
   if (!sanitized || !Number.isFinite(price)) {
-    return fallback;
+    return undefined;
   }
 
   return clampPrice(price);
 }
 
 function normalizePriceRange(range: PriceRange): PriceRange {
+  if (range.min === undefined || range.max === undefined) {
+    return {
+      max: range.max === undefined ? undefined : clampPrice(range.max),
+      min: range.min === undefined ? undefined : clampPrice(range.min),
+    };
+  }
+
   const min = clampPrice(range.min);
   const max = clampPrice(range.max);
 
@@ -312,8 +352,8 @@ function clampPrice(value: number) {
 
 function toPriceInputValues(range: PriceRange): PriceInputValues {
   return {
-    max: String(range.max),
-    min: String(range.min),
+    max: range.max === undefined ? '' : String(range.max),
+    min: range.min === undefined ? '' : String(range.min),
   };
 }
 
@@ -400,12 +440,20 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'flex-end',
     left: 0,
-    padding: Spacing.four,
+    paddingBottom: BottomTabInset + Spacing.four,
+    paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.four,
     position: 'absolute',
     right: 0,
     top: 0,
   },
   sheetSection: {
     gap: Spacing.three,
+  },
+  sheetSectionHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: Spacing.three,
+    justifyContent: 'space-between',
   },
 });
