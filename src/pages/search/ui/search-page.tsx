@@ -14,12 +14,16 @@ import { AppText, Button, Screen, SearchField } from '@/shared/ui';
 
 const recentSearches = ['응원봉', '포토카드', '후드'];
 const GRID_GAP = Spacing.three;
+const RECOMMENDED_PRODUCT_LIMIT = 12;
 const SCREEN_PADDING = Spacing.six;
 
 export default function SearchPage() {
   const { width } = useWindowDimensions();
   const [query, setQuery] = useState('');
-  const products = useMemo(() => searchProducts({ category: 'all', query: '' }), []);
+  const products = useMemo(
+    () => searchProducts({ category: 'all', query: '' }).slice(0, RECOMMENDED_PRODUCT_LIMIT),
+    []
+  );
   const columnCount = 3;
   const boundedWidth = Math.max(width, 320);
   const contentWidth = Math.min(boundedWidth, MaxContentWidth) - SCREEN_PADDING * 2 - Spacing.four;
@@ -44,27 +48,25 @@ export default function SearchPage() {
         onSubmitEditing={() => openSearchDetail('all')}
       />
 
-      {!query && (
-        <View style={styles.section}>
-          <AppText color="textSecondary" variant="label">
-            최근 검색어
-          </AppText>
-          <View style={styles.chipRow}>
-            {recentSearches.map((keyword) => (
-              <Button
-                key={keyword}
-                size="sm"
-                variant="ghost"
-                onPress={() => {
-                  setQuery(keyword);
-                  openSearchDetail('all', keyword);
-                }}>
-                {keyword}
-              </Button>
-            ))}
-          </View>
+      <View style={styles.section}>
+        <AppText color="textSecondary" variant="label">
+          최근 검색어
+        </AppText>
+        <View style={styles.chipRow}>
+          {recentSearches.map((keyword) => (
+            <Button
+              key={keyword}
+              size="sm"
+              variant="ghost"
+              onPress={() => {
+                setQuery(keyword);
+                openSearchDetail('all', keyword);
+              }}>
+              {keyword}
+            </Button>
+          ))}
         </View>
-      )}
+      </View>
 
       <View style={styles.section}>
         <AppText color="textSecondary" variant="label">

@@ -5,7 +5,6 @@ import {
   StyleSheet,
   useWindowDimensions,
   View,
-  type GestureResponderEvent,
 } from 'react-native';
 
 import {
@@ -18,18 +17,21 @@ import { ProductCard } from '@/entities/product/ui';
 import { MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { formatKRW } from '@/shared/lib';
-import { AppText, Button, Card, Screen, SearchField } from '@/shared/ui';
+import { AppText, Button, Card, Screen, SearchField, TextField } from '@/shared/ui';
 
 const GRID_GAP = Spacing.three;
 const PRICE_MAX = 90000;
 const PRICE_MIN = 0;
-const PRICE_STEP = 5000;
-const RANGE_HANDLE_SIZE = 22;
 const SCREEN_PADDING = Spacing.six;
 
 type PriceRange = {
   max: number;
   min: number;
+};
+
+type PriceInputValues = {
+  max: string;
+  min: string;
 };
 
 export default function SearchDetailPage() {
@@ -48,7 +50,9 @@ export default function SearchDetailPage() {
   const [priceRange, setPriceRange] = useState<PriceRange>(initialPriceRange);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [draftCategory, setDraftCategory] = useState<ProductCategory>(initialCategory);
-  const [draftPriceRange, setDraftPriceRange] = useState<PriceRange>(priceRange);
+  const [draftPriceInputs, setDraftPriceInputs] = useState<PriceInputValues>(
+    toPriceInputValues(priceRange)
+  );
   const products = useMemo(
     () =>
       searchProducts({
@@ -66,28 +70,44 @@ export default function SearchDetailPage() {
 
   function openFilters() {
     setDraftCategory(category);
-    setDraftPriceRange(priceRange);
+    setDraftPriceInputs(toPriceInputValues(priceRange));
     setSheetOpen(true);
   }
 
   function applyFilters() {
+    const nextPriceRange = normalizePriceRange({
+      max: parsePriceInput(draftPriceInputs.max, PRICE_MAX),
+      min: parsePriceInput(draftPriceInputs.min, PRICE_MIN),
+    });
+
     setCategory(draftCategory);
-    setPriceRange(draftPriceRange);
+    setPriceRange(nextPriceRange);
     setSheetOpen(false);
     router.replace({
       pathname: '/search-detail/[category]',
       params: {
         category: draftCategory,
-        maxPrice: String(draftPriceRange.max),
-        minPrice: String(draftPriceRange.min),
+        maxPrice: String(nextPriceRange.max),
+        minPrice: String(nextPriceRange.min),
         query,
       },
     });
   }
 
   function resetFilters() {
+    const defaultPriceRange = { max: PRICE_MAX, min: PRICE_MIN };
+
     setDraftCategory('all');
-    setDraftPriceRange({ max: PRICE_MAX, min: PRICE_MIN });
+    setDraftPriceInputs(toPriceInputValues(defaultPriceRange));
+  }
+
+  function updateDraftPriceInput(field: keyof PriceInputValues, value: string) {
+    const nextValue = sanitizePriceInput(value);
+
+    setDraftPriceInputs((current) => ({
+      ...current,
+      [field]: nextValue,
+    }));
   }
 
   return (
@@ -154,7 +174,12 @@ export default function SearchDetailPage() {
               <AppText color="textSecondary" variant="label">
                 가격 범위
               </AppText>
-              <PriceRangeBar range={draftPriceRange} onChange={setDraftPriceRange} />
+              <PriceRangeInputs
+                maxValue={draftPriceInputs.max}
+                minValue={draftPriceInputs.min}
+                onMaxChange={(value) => updateDraftPriceInput('max', value)}
+                onMinChange={(value) => updateDraftPriceInput('min', value)}
+              />
             </View>
 
             <View style={styles.sheetActions}>
@@ -172,121 +197,53 @@ export default function SearchDetailPage() {
   );
 }
 
-function PriceRangeBar({
-  onChange,
-  range,
+function PriceRangeInputs({
+  maxValue,
+  minValue,
+  onMaxChange,
+  onMinChange,
 }: {
-  onChange: (range: PriceRange) => void;
-  range: PriceRange;
+  maxValue: string;
+  minValue: string;
+  onMaxChange: (value: string) => void;
+  onMinChange: (value: string) => void;
 }) {
-  const [trackWidth, setTrackWidth] = useState(0);
-  const theme = useTheme();
-  const minOffset = valueToOffset(range.min, trackWidth);
-  const maxOffset = valueToOffset(range.max, trackWidth);
-
-  function updateRange(event: GestureResponderEvent) {
-    if (!Number.isFinite(trackWidth) || trackWidth <= 0) {
-      return;
-    }
-
-    const locationX = getPressLocationX(event);
-
-    if (locationX === null) {
-      return;
-    }
-
-    const clampedLocationX = Math.max(0, Math.min(trackWidth, locationX));
-    const nextValue = snapPrice(
-      PRICE_MIN + (clampedLocationX / trackWidth) * (PRICE_MAX - PRICE_MIN)
-    );
-    const shouldMoveMin = Math.abs(nextValue - range.min) <= Math.abs(nextValue - range.max);
-
-    if (shouldMoveMin) {
-      onChange({
-        max: range.max,
-        min: Math.min(nextValue, range.max - PRICE_STEP),
-      });
-      return;
-    }
-
-    onChange({
-      max: Math.max(nextValue, range.min + PRICE_STEP),
-      min: range.min,
-    });
-  }
-
   return (
-    <View style={styles.priceRange}>
-      <View style={styles.priceValues}>
-        <AppText style={styles.priceValueText} variant="label">
-          {formatKRW(range.min)}
+    <View style={styles.priceInputs}>
+      <View style={styles.priceInputGroup}>
+        <AppText color="textSecondary" variant="caption">
+          최소 가격
         </AppText>
-        <AppText style={styles.priceValueText} variant="label">
-          {formatKRW(range.max)}
-        </AppText>
+        <TextField
+          keyboardType="number-pad"
+          placeholder="최소 가격"
+          returnKeyType="done"
+          style={styles.priceInput}
+          value={minValue}
+          onChangeText={onMinChange}
+        />
       </View>
 
-      <Pressable
-        style={styles.rangeTrack}
-        onLayout={(event) => {
-          const width = event.nativeEvent.layout.width;
+      <AppText color="textTertiary" style={styles.priceInputSeparator} variant="label">
+        ~
+      </AppText>
 
-          if (Number.isFinite(width) && width > 0) {
-            setTrackWidth(width);
-          }
-        }}
-        onPress={updateRange}>
-        <View
-          pointerEvents="none"
-          style={[styles.rangeRail, { backgroundColor: theme.backgroundSelected }]}
+      <View style={styles.priceInputGroup}>
+        <AppText color="textSecondary" variant="caption">
+          최대 가격
+        </AppText>
+        <TextField
+          keyboardType="number-pad"
+          placeholder="최대 가격"
+          returnKeyType="done"
+          style={styles.priceInput}
+          value={maxValue}
+          onChangeText={onMaxChange}
         />
-        <View
-          pointerEvents="none"
-          style={[
-            styles.rangeSelected,
-            {
-              backgroundColor: theme.text,
-              left: minOffset,
-              width: Math.max(maxOffset - minOffset, 0),
-            },
-          ]}
-        />
-        <View
-          pointerEvents="none"
-          style={[
-            styles.rangeHandle,
-            {
-              backgroundColor: theme.text,
-              left: minOffset - RANGE_HANDLE_SIZE / 2,
-            },
-          ]}
-        />
-        <View
-          pointerEvents="none"
-          style={[
-            styles.rangeHandle,
-            {
-              backgroundColor: theme.text,
-              left: maxOffset - RANGE_HANDLE_SIZE / 2,
-            },
-          ]}
-        />
-      </Pressable>
+      </View>
     </View>
   );
 }
-
-type WebPressEventShape = GestureResponderEvent['nativeEvent'] & {
-  clientX?: number;
-  offsetX?: number;
-  target?: unknown;
-};
-
-type WebTargetShape = {
-  getBoundingClientRect?: () => {
-    left: number;
-  };
-};
 
 function formatPriceRange(range: PriceRange) {
   return `${formatKRW(range.min)} - ${formatKRW(range.max)}`;
@@ -299,70 +256,51 @@ function parseCategory(category?: string): ProductCategory {
 }
 
 function parsePriceRange(minPrice?: string, maxPrice?: string): PriceRange {
-  const min = parsePriceParam(minPrice, PRICE_MIN);
-  const max = parsePriceParam(maxPrice, PRICE_MAX);
-
-  if (max - min < PRICE_STEP) {
-    return { max: PRICE_MAX, min: PRICE_MIN };
-  }
-
-  return { max, min };
+  return normalizePriceRange({
+    max: parsePriceParam(maxPrice, PRICE_MAX),
+    min: parsePriceParam(minPrice, PRICE_MIN),
+  });
 }
 
 function parsePriceParam(value: string | undefined, fallback: number) {
-  const price = Number(value);
+  return parsePriceInput(value ?? '', fallback);
+}
 
-  if (!Number.isFinite(price)) {
+function parsePriceInput(value: string, fallback: number) {
+  const sanitized = sanitizePriceInput(value);
+  const price = Number(sanitized);
+
+  if (!sanitized || !Number.isFinite(price)) {
     return fallback;
   }
 
-  return snapPrice(price);
+  return clampPrice(price);
 }
 
-function snapPrice(value: number) {
-  const snapped = Math.round(value / PRICE_STEP) * PRICE_STEP;
+function normalizePriceRange(range: PriceRange): PriceRange {
+  const min = clampPrice(range.min);
+  const max = clampPrice(range.max);
 
-  return Math.max(PRICE_MIN, Math.min(PRICE_MAX, snapped));
-}
-
-function getPressLocationX(event: GestureResponderEvent) {
-  const nativeEvent = event.nativeEvent as WebPressEventShape;
-  const directLocationX = getFiniteNumber(nativeEvent.locationX) ?? getFiniteNumber(nativeEvent.offsetX);
-
-  if (directLocationX !== null) {
-    return directLocationX;
+  if (min <= max) {
+    return { max, min };
   }
 
-  const pageX = getFiniteNumber(nativeEvent.pageX) ?? getFiniteNumber(nativeEvent.clientX);
-  const currentTarget = toWebTarget((event as { currentTarget?: unknown }).currentTarget);
-  const target = currentTarget ?? toWebTarget(nativeEvent.target);
-  const left = getFiniteNumber(target?.getBoundingClientRect?.().left);
-
-  if (pageX === null || left === null) {
-    return null;
-  }
-
-  return pageX - left;
+  return { max: min, min: max };
 }
 
-function getFiniteNumber(value: unknown) {
-  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+function sanitizePriceInput(value: string) {
+  return value.replace(/\D/g, '');
 }
 
-function toWebTarget(target: unknown): WebTargetShape | null {
-  if (typeof target !== 'object' || target === null || !('getBoundingClientRect' in target)) {
-    return null;
-  }
-
-  return target as WebTargetShape;
+function clampPrice(value: number) {
+  return Math.max(PRICE_MIN, Math.min(PRICE_MAX, Math.round(value)));
 }
 
-function valueToOffset(value: number, trackWidth: number) {
-  if (!Number.isFinite(trackWidth) || trackWidth <= 0) {
-    return 0;
-  }
-
-  return ((value - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * trackWidth;
+function toPriceInputValues(range: PriceRange): PriceInputValues {
+  return {
+    max: String(range.max),
+    min: String(range.min),
+  };
 }
 
 const styles = StyleSheet.create({
@@ -393,41 +331,22 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: Spacing.two,
   },
-  priceRange: {
+  priceInput: {
+    fontVariant: ['tabular-nums'],
+    minHeight: 48,
+    textAlign: 'right',
+  },
+  priceInputGroup: {
+    flex: 1,
     gap: Spacing.two,
   },
-  priceValues: {
-    alignItems: 'center',
+  priceInputSeparator: {
+    paddingBottom: 14,
+  },
+  priceInputs: {
+    alignItems: 'flex-end',
     flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  priceValueText: {
-    fontVariant: ['tabular-nums'],
-  },
-  rangeHandle: {
-    borderCurve: 'continuous',
-    borderRadius: Radius.full,
-    height: RANGE_HANDLE_SIZE,
-    position: 'absolute',
-    top: 9,
-    width: RANGE_HANDLE_SIZE,
-  },
-  rangeRail: {
-    borderRadius: Radius.full,
-    height: 4,
-    left: 0,
-    position: 'absolute',
-    right: 0,
-    top: 18,
-  },
-  rangeSelected: {
-    borderRadius: Radius.full,
-    height: 4,
-    position: 'absolute',
-    top: 18,
-  },
-  rangeTrack: {
-    height: 40,
+    gap: Spacing.two,
   },
   results: {
     flexDirection: 'row',
