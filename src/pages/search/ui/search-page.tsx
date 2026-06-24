@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useMemo } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import {
@@ -18,8 +18,9 @@ const RECOMMENDED_PRODUCT_LIMIT = 12;
 const SCREEN_PADDING = Spacing.six;
 
 export default function SearchPage() {
+  const params = useLocalSearchParams<{ query?: string }>();
   const { width } = useWindowDimensions();
-  const [query, setQuery] = useState('');
+  const query = params.query ?? '';
   const products = useMemo(
     () => searchProducts({ category: 'all', query: '' }).slice(0, RECOMMENDED_PRODUCT_LIMIT),
     []
@@ -39,12 +40,16 @@ export default function SearchPage() {
     });
   }
 
+  function updateQuery(nextQuery: string) {
+    router.setParams({ query: nextQuery });
+  }
+
   return (
     <Screen preserveScroll>
       <SearchField
         placeholder="상품 검색"
         value={query}
-        onChangeText={setQuery}
+        onChangeText={updateQuery}
         onSubmitEditing={() => openSearchDetail('all')}
       />
 
@@ -59,7 +64,7 @@ export default function SearchPage() {
               size="sm"
               variant="ghost"
               onPress={() => {
-                setQuery(keyword);
+                updateQuery(keyword);
                 openSearchDetail('all', keyword);
               }}>
               {keyword}

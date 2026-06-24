@@ -45,7 +45,7 @@ export default function SearchDetailPage() {
   const theme = useTheme();
   const initialCategory = parseCategory(params.category);
   const initialPriceRange = parsePriceRange(params.minPrice, params.maxPrice);
-  const [query, setQuery] = useState(params.query ?? '');
+  const query = params.query ?? '';
   const [category, setCategory] = useState<ProductCategory>(initialCategory);
   const [priceRange, setPriceRange] = useState<PriceRange>(initialPriceRange);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -110,10 +110,24 @@ export default function SearchDetailPage() {
     }));
   }
 
+  function openSearchHome() {
+    router.replace({
+      pathname: '/search',
+      params: { query },
+    });
+  }
+
   return (
     <View style={[styles.root, { backgroundColor: theme.background }]}>
       <Screen preserveScroll contentContainerStyle={styles.content}>
-        <SearchField placeholder="상품 검색" value={query} onChangeText={setQuery} />
+        <Pressable accessibilityRole="button" onPress={openSearchHome}>
+          <SearchField
+            editable={false}
+            placeholder="상품 검색"
+            value={query}
+            onPressIn={openSearchHome}
+          />
+        </Pressable>
 
         <View style={styles.filterChips}>
           <Button size="sm" variant="secondary" onPress={openFilters}>

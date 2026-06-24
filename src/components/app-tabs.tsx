@@ -26,7 +26,7 @@ export default function AppTabs() {
         />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="search" role="search">
+      <NativeTabs.Trigger name="(search)" role="search">
         <NativeTabs.Trigger.Label>검색</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           md="search"
