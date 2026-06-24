@@ -24,7 +24,7 @@ export default function HomePage() {
   const itemWidth = (contentWidth - GRID_GAP * (columnCount - 1)) / columnCount;
 
   return (
-    <Screen contentContainerStyle={styles.content}>
+    <Screen preserveScroll contentContainerStyle={styles.content}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}

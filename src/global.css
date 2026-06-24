@@ -33,4 +33,18 @@ html,
 body,
 #root {
   font-family: var(--font-display);
+  scrollbar-width: none;
+}
+
+* {
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#root::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none;
+  height: 0;
+  width: 0;
 }

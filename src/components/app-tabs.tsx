@@ -22,7 +22,7 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Label>홈</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           md="home"
-          sf={{ default: 'house', selected: 'house.fill' }}
+          sf={{ default: 'house.fill', selected: 'house.fill' }}
         />
       </NativeTabs.Trigger>
 
@@ -30,7 +30,7 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Label>검색</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           md="search"
-          sf={{ default: 'magnifyingglass', selected: 'magnifyingglass' }}
+          sf={{ default: 'magnifyingglass.circle.fill', selected: 'magnifyingglass.circle.fill' }}
         />
       </NativeTabs.Trigger>
 
@@ -41,7 +41,7 @@ export default function AppTabs() {
         )}
         <NativeTabs.Trigger.Icon
           md="shopping_cart"
-          sf={{ default: 'cart', selected: 'cart.fill' }}
+          sf={{ default: 'cart.fill', selected: 'cart.fill' }}
         />
       </NativeTabs.Trigger>
 
@@ -49,7 +49,7 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Label>주문</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           md="local_shipping"
-          sf={{ default: 'shippingbox', selected: 'shippingbox.fill' }}
+          sf={{ default: 'shippingbox.fill', selected: 'shippingbox.fill' }}
         />
       </NativeTabs.Trigger>
 
@@ -57,7 +57,7 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Label>프로필</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           md="person"
-          sf={{ default: 'person', selected: 'person.fill' }}
+          sf={{ default: 'person.fill', selected: 'person.fill' }}
         />
       </NativeTabs.Trigger>
     </NativeTabs>

@@ -37,7 +37,7 @@ export default function SearchPage() {
   const itemWidth = (contentWidth - GRID_GAP * (columnCount - 1)) / columnCount;
 
   return (
-    <Screen>
+    <Screen preserveScroll>
       <SearchField
         placeholder="상품 검색"
         value={query}
