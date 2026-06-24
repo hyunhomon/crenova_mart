@@ -33,18 +33,36 @@ html,
 body,
 #root {
   font-family: var(--font-display);
-  scrollbar-width: none;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  scrollbar-gutter: auto;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none;
 }
 
 * {
-  scrollbar-width: none;
+  scrollbar-gutter: auto !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
 html::-webkit-scrollbar,
 body::-webkit-scrollbar,
 #root::-webkit-scrollbar,
 *::-webkit-scrollbar {
-  display: none;
-  height: 0;
-  width: 0;
+  display: none !important;
+  height: 0 !important;
+  width: 0 !important;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+#root::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track,
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+#root::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb {
+  background: transparent !important;
 }
