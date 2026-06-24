@@ -246,9 +246,6 @@ function PriceRangeInputs({
   return (
     <View style={styles.priceInputs}>
       <View style={styles.priceInputGroup}>
-        <AppText color="textSecondary" variant="caption">
-          최소 가격
-        </AppText>
         <TextField
           keyboardType="number-pad"
           placeholder="최소 가격"
@@ -264,9 +261,6 @@ function PriceRangeInputs({
       </AppText>
 
       <View style={styles.priceInputGroup}>
-        <AppText color="textSecondary" variant="caption">
-          최대 가격
-        </AppText>
         <TextField
           keyboardType="number-pad"
           placeholder="최대 가격"
@@ -388,7 +382,7 @@ const styles = StyleSheet.create({
   priceInput: {
     fontVariant: ['tabular-nums'],
     minHeight: 48,
-    textAlign: 'right',
+    textAlign: 'left',
   },
   priceInputGroup: {
     flex: 1,
