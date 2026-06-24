@@ -1,12 +1,13 @@
 import { Image } from 'expo-image';
-import { router, useLocalSearchParams } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { Link, router, useLocalSearchParams } from 'expo-router';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { formatPaymentMethod } from '@/entities/checkout';
 import {
   deliveryStatusSteps,
   getDeliveryStatusLabel,
   isDeliveryStatusReached,
+  type OrderItem,
 } from '@/entities/order';
 import { getProductById } from '@/entities/product';
 import { getOrderById, getStatusBadgeVariant } from '@/features/orders/model';
@@ -67,26 +68,9 @@ export default function OrderDetailPage() {
 
       <Card style={styles.section}>
         <AppText variant="label">상품</AppText>
-        {order.items.map((item) => {
-          const product = getProductById(item.productId);
-
-          return (
-            <View key={item.id} style={styles.itemRow}>
-              {product && (
-                <Image contentFit="cover" source={product.imageUrl} style={styles.image} />
-              )}
-              <View style={styles.itemCopy}>
-                <AppText numberOfLines={2} variant="label">
-                  {item.productName}
-                </AppText>
-                <AppText color="textSecondary" variant="caption">
-                  {item.quantity}개
-                </AppText>
-              </View>
-              <AppText variant="label">{formatKRW(item.unitPrice * item.quantity)}</AppText>
-            </View>
-          );
-        })}
+        {order.items.map((item) => (
+          <OrderProductRow key={item.id} item={item} />
+        ))}
       </Card>
 
       <Card style={styles.section}>
@@ -94,6 +78,41 @@ export default function OrderDetailPage() {
         <SummaryRow label="결제수단" value={formatPaymentMethod(order.payment.method)} />
       </Card>
     </Screen>
+  );
+}
+
+function OrderProductRow({ item }: { item: OrderItem }) {
+  const product = getProductById(item.productId);
+  const rowContent = (
+    <>
+      {product && <Image contentFit="cover" source={product.imageUrl} style={styles.image} />}
+      <View style={styles.itemCopy}>
+        <AppText numberOfLines={2} variant="label">
+          {item.productName}
+        </AppText>
+        <AppText color="textSecondary" variant="caption">
+          {item.quantity}개
+        </AppText>
+      </View>
+      <AppText variant="label">{formatKRW(item.unitPrice * item.quantity)}</AppText>
+    </>
+  );
+
+  if (!product) {
+    return <View style={styles.itemRow}>{rowContent}</View>;
+  }
+
+  return (
+    <Link
+      asChild
+      href={{
+        params: { productId: product.id },
+        pathname: '/product/[productId]',
+      }}>
+      <Pressable style={({ pressed }) => [styles.itemRow, pressed && styles.pressed]}>
+        {rowContent}
+      </Pressable>
+    </Link>
   );
 }
 
@@ -123,6 +142,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: Spacing.three,
+  },
+  pressed: {
+    opacity: 0.72,
   },
   section: {
     gap: Spacing.three,
