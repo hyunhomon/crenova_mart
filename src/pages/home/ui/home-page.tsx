@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { router } from 'expo-router';
+import { Bell } from 'lucide-react-native';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import {
@@ -9,10 +11,10 @@ import {
 } from '@/entities/product';
 import { ProductCard } from '@/entities/product/ui';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
-import { AppText, Button, Screen } from '@/shared/ui';
+import { AppText, Button, IconButton, Screen } from '@/shared/ui';
 
 const GRID_GAP = Spacing.three;
-const SCREEN_PADDING = Spacing.four;
+const SCREEN_PADDING = Spacing.six;
 
 export default function HomePage() {
   const { width } = useWindowDimensions();
@@ -25,7 +27,16 @@ export default function HomePage() {
 
   return (
     <Screen preserveScroll contentContainerStyle={styles.content}>
-      <AppText variant="h1">팬덤&</AppText>
+      <View style={styles.topBar}>
+        <AppText variant="h1">팬덤&</AppText>
+        <IconButton
+          accessibilityLabel="알림"
+          icon={Bell}
+          showDot
+          size="sm"
+          onPress={() => router.push('/notifications')}
+        />
+      </View>
 
       <ScrollView
         horizontal
@@ -55,9 +66,7 @@ export default function HomePage() {
 
 const styles = StyleSheet.create({
   content: {
-    gap: Spacing.four,
     paddingHorizontal: SCREEN_PADDING,
-    paddingTop: Spacing.three,
   },
   feed: {
     flexDirection: 'row',
@@ -74,5 +83,10 @@ const styles = StyleSheet.create({
   },
   railTab: {
     minHeight: 36,
+  },
+  topBar: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });

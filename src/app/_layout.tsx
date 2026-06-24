@@ -28,6 +28,7 @@ export default function TabLayout() {
           <Stack.Screen name="checkout/success" options={{ headerShown: false }} />
           <Stack.Screen name="checkout/fail" options={{ headerShown: false }} />
           <Stack.Screen name="orders/[orderId]" options={{ headerShown: false }} />
+          <Stack.Screen name="notifications" options={{ headerShown: false }} />
         </Stack>
       </CartProvider>
     </ThemeProvider>
