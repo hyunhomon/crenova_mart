@@ -30,6 +30,16 @@ const accountRows = [
   { icon: LogOut, label: '로그아웃' },
 ] as const;
 
+const businessRows = [
+  ['상호', '팬덤&'],
+  ['대표자', '장원석'],
+  ['사업자등록번호', '187-56-00809'],
+  ['개업연월일', '2024년 09월 09일'],
+  ['사업장 소재지', '대전광역시 서구 계룡로568번길 15-4, 101호(괴정동)'],
+  ['업태', '서비스업'],
+  ['종목', '쇼핑대행'],
+] as const;
+
 export default function ProfilePage() {
   const theme = useTheme();
 
@@ -37,13 +47,16 @@ export default function ProfilePage() {
     <Screen>
       <View style={styles.header}>
         <AppText variant="h1">프로필</AppText>
+      </View>
+
+      <Card style={styles.identityCard} variant="muted">
         <View style={styles.identity}>
           <AppText variant="label">mail@example.com</AppText>
           <AppText color="textSecondary" variant="caption">
             서울시 강남구 테헤란로
           </AppText>
         </View>
-      </View>
+      </Card>
 
       <Card style={styles.statsCard} variant="muted">
         {stats.map(([value, label], index) => (
@@ -74,11 +87,27 @@ export default function ProfilePage() {
         {accountRows.map(({ icon: Icon, label }) => (
           <View key={label} style={styles.menuRow}>
             <Icon color={theme.textTertiary} size={17} strokeWidth={2.3} />
-            <AppText color={label === '로그아웃' ? 'danger' : 'textSecondary'} variant="label">
+            <AppText color="textSecondary" variant="label">
               {label}
             </AppText>
           </View>
         ))}
+      </Card>
+
+      <Card style={styles.businessCard} variant="muted">
+        <AppText variant="label">사업자 정보</AppText>
+        <View style={styles.businessList}>
+          {businessRows.map(([label, value]) => (
+            <View key={label} style={styles.businessRow}>
+              <AppText color="textTertiary" variant="caption">
+                {label}
+              </AppText>
+              <AppText color="textSecondary" variant="caption">
+                {value}
+              </AppText>
+            </View>
+          ))}
+        </View>
       </Card>
     </Screen>
   );
@@ -86,10 +115,22 @@ export default function ProfilePage() {
 
 const styles = StyleSheet.create({
   header: {
-    gap: Spacing.five,
+    gap: Spacing.two,
   },
   identity: {
     gap: Spacing.two,
+  },
+  identityCard: {
+    gap: Spacing.two,
+  },
+  businessCard: {
+    gap: Spacing.four,
+  },
+  businessList: {
+    gap: Spacing.three,
+  },
+  businessRow: {
+    gap: Spacing.half,
   },
   menuCard: {
     gap: Spacing.five,
