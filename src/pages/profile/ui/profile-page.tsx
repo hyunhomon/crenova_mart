@@ -41,10 +41,6 @@ export default function ProfilePage() {
 
   return (
     <Screen contentContainerStyle={styles.content}>
-      <View style={styles.header}>
-        <AppText variant="h1">프로필</AppText>
-      </View>
-
       <Card padded={false} style={styles.identityCard} variant="ghost">
         <AppText style={styles.email} variant="title">
           mail@example.com
@@ -108,9 +104,6 @@ const styles = StyleSheet.create({
   email: {
     fontSize: 18,
     lineHeight: 24,
-  },
-  header: {
-    gap: Spacing.two,
   },
   identityCard: {
     gap: Spacing.one,
