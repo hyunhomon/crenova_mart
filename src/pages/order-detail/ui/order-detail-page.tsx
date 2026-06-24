@@ -1,13 +1,9 @@
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import {
-  DeliveryStatus,
-  advanceDeliveryStatus,
-  getDeliveryStatusLabel,
-} from '@/entities/order';
+import { formatPaymentMethod } from '@/entities/checkout';
+import { DeliveryStatus, getDeliveryStatusLabel } from '@/entities/order';
 import { getProductById } from '@/entities/product';
 import { getOrderById, getStatusBadgeVariant } from '@/features/orders/model';
 import { formatKRW } from '@/shared/lib';
@@ -17,7 +13,7 @@ import { AppText, Badge, Button, Card, Screen } from '@/shared/ui';
 export default function OrderDetailPage() {
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
   const order = getOrderById(orderId);
-  const [status, setStatus] = useState<DeliveryStatus | null>(order?.status ?? null);
+  const status = order?.status;
 
   if (!order || !status) {
     return (
@@ -50,12 +46,6 @@ export default function OrderDetailPage() {
             </View>
           ))}
         </View>
-        <Button
-          disabled={status === 'delivered'}
-          variant="secondary"
-          onPress={() => setStatus(advanceDeliveryStatus(status))}>
-          상태 변경
-        </Button>
       </Card>
 
       <Card style={styles.section}>
@@ -84,7 +74,7 @@ export default function OrderDetailPage() {
 
       <Card style={styles.section}>
         <SummaryRow label="결제금액" value={formatKRW(order.payment.totalAmount)} />
-        <SummaryRow label="결제수단" value="토스페이먼츠" />
+        <SummaryRow label="결제수단" value={formatPaymentMethod(order.payment.method)} />
       </Card>
     </Screen>
   );

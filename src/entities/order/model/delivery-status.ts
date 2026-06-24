@@ -5,15 +5,6 @@ const deliveryStatusLabels: Record<DeliveryStatus, string> = {
   shipping: '배송 중',
 };
 
-const nextDeliveryStatus: Record<DeliveryStatus, DeliveryStatus> = {
-  delivered: 'delivered',
-  shipping: 'delivered',
-};
-
 export function getDeliveryStatusLabel(status: DeliveryStatus) {
   return deliveryStatusLabels[status];
-}
-
-export function advanceDeliveryStatus(status: DeliveryStatus) {
-  return nextDeliveryStatus[status];
 }
