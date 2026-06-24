@@ -9,7 +9,7 @@ import {
 } from '@/entities/product';
 import { ProductCard } from '@/entities/product/ui';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
-import { Button, Screen } from '@/shared/ui';
+import { AppText, Button, Screen } from '@/shared/ui';
 
 const GRID_GAP = Spacing.three;
 const SCREEN_PADDING = Spacing.four;
@@ -25,6 +25,8 @@ export default function HomePage() {
 
   return (
     <Screen preserveScroll contentContainerStyle={styles.content}>
+      <AppText variant="h1">팬덤&</AppText>
+
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
