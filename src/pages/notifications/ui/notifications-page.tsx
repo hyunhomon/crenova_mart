@@ -1,95 +1,85 @@
 import { router } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
+import { CreditCard, PackageCheck, X } from 'lucide-react-native';
+import { type ComponentType } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { mockNotifications, NotificationKind } from '@/entities/notification';
-import { Spacing } from '@/constants/theme';
-import { AppText, Badge, Card, IconButton, Screen } from '@/shared/ui';
+import { Radius, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
+import { AppText, Card, IconButton, Screen } from '@/shared/ui';
 
-const notificationKindLabel: Record<NotificationKind, string> = {
-  cart: '장바구니',
-  delivery: '배송',
-  event: '추천',
-  order: '주문',
-};
-
-const notificationKindVariant = {
-  cart: 'secondary',
-  delivery: 'success',
-  event: 'default',
-  order: 'warning',
-} as const;
+const notificationIcon: Record<NotificationKind, ComponentType<{ color?: string; size?: number }>> =
+  {
+    delivery: PackageCheck,
+    payment: CreditCard,
+  };
 
 export default function NotificationsPage() {
+  const theme = useTheme();
+
   return (
     <Screen>
       <View style={styles.topBar}>
+        <AppText variant="h1">알림</AppText>
         <IconButton
-          accessibilityLabel="뒤로"
-          icon={ChevronLeft}
+          accessibilityLabel="닫기"
+          icon={X}
           size="sm"
-          onPress={() => router.back()}
+          onPress={() => router.replace('/')}
         />
-        <AppText style={styles.title} variant="h1">
-          알림
-        </AppText>
-        <View style={styles.topBarSpacer} />
       </View>
 
       <View style={styles.list}>
-        {mockNotifications.map((notification) => (
-          <Card
-            key={notification.id}
-            style={[styles.notificationCard, notification.unread && styles.unreadCard]}
-            variant={notification.unread ? 'muted' : 'ghost'}>
-            <View style={styles.cardHeader}>
-              <Badge variant={notificationKindVariant[notification.kind]}>
-                {notificationKindLabel[notification.kind]}
-              </Badge>
-              <AppText color="textTertiary" variant="caption">
-                {notification.timeLabel}
-              </AppText>
-            </View>
-            <View style={styles.copy}>
-              <AppText variant="label">{notification.title}</AppText>
-              <AppText color="textSecondary">{notification.message}</AppText>
-            </View>
-          </Card>
-        ))}
+        {mockNotifications.map((notification) => {
+          const Icon = notificationIcon[notification.kind];
+
+          return (
+            <Card key={notification.id} style={styles.notificationCard} variant="ghost">
+              <View style={[styles.iconBox, { backgroundColor: theme.backgroundElement }]}>
+                <Icon color={theme.text} size={20} />
+              </View>
+              <View style={styles.copy}>
+                <AppText variant="label">{notification.title}</AppText>
+                <AppText color="textSecondary">{notification.description}</AppText>
+                <AppText color="textTertiary" variant="caption">
+                  {notification.timeLabel}
+                </AppText>
+              </View>
+            </Card>
+          );
+        })}
       </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  cardHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
   copy: {
+    flex: 1,
     gap: Spacing.one,
   },
+  iconBox: {
+    alignItems: 'center',
+    borderCurve: 'continuous',
+    borderRadius: Radius.md,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
+  },
   list: {
-    gap: Spacing.three,
+    gap: Spacing.one,
   },
   notificationCard: {
+    alignItems: 'flex-start',
+    borderWidth: 0,
+    flexDirection: 'row',
     gap: Spacing.three,
-  },
-  title: {
-    flex: 1,
-    textAlign: 'center',
+    paddingHorizontal: 0,
+    paddingVertical: Spacing.three,
   },
   topBar: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: Spacing.two,
-  },
-  topBarSpacer: {
-    height: 32,
-    width: 32,
-  },
-  unreadCard: {
-    borderColor: 'rgba(255, 255, 255, 0.18)',
+    justifyContent: 'space-between',
   },
 });

@@ -1,10 +1,9 @@
-export type NotificationKind = 'cart' | 'delivery' | 'event' | 'order';
+export type NotificationKind = 'delivery' | 'payment';
 
 export type NotificationItem = {
+  description: string;
   id: string;
   kind: NotificationKind;
-  message: string;
   timeLabel: string;
   title: string;
-  unread: boolean;
 };
