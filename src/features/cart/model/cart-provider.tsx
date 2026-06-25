@@ -95,7 +95,7 @@ export function CartProvider({ children }: CartProviderProps) {
     [items, lines, summary]
   );
 
-  return <CartContext value={store}>{children}</CartContext>;
+  return <CartContext.Provider value={store}>{children}</CartContext.Provider>;
 }
 
 export function useCart() {

@@ -21,7 +21,7 @@ export const mockProducts: Product[] = [
     },
     imageUrl:
       'https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=80',
-    name: 'LUMINA 공식 응원봉 ver.3',
+    name: 'LUMINA 공식 응원봉 ver 3',
     options: [
       { id: 'option-default', name: '기본 패키지', priceDelta: 0 },
       { id: 'option-battery', name: '건전지 포함', priceDelta: 2500 },

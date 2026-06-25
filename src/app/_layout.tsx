@@ -12,12 +12,13 @@ export default function TabLayout() {
       <CartProvider>
         <Stack
           screenOptions={{
-            headerBackButtonDisplayMode: 'minimal',
             headerShadowVisible: false,
           }}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="product/[productId]" options={{ title: '상품' }} />
-          <Stack.Screen name="checkout" options={{ title: '주문서' }} />
+          <Stack.Screen name="product/[productId]" options={{ headerShown: false }} />
+          <Stack.Screen name="checkout" options={{ headerShown: false }} />
+          <Stack.Screen name="checkout/success" options={{ headerShown: false }} />
+          <Stack.Screen name="checkout/fail" options={{ headerShown: false }} />
         </Stack>
       </CartProvider>
     </ThemeProvider>
