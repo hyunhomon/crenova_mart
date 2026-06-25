@@ -80,6 +80,23 @@ function savePaidOrder(order: Order) {
   window.sessionStorage.setItem(paidOrderKey, JSON.stringify(order));
 }
 
+export function getStoredPaidOrder() {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  const rawOrder = window.sessionStorage.getItem(paidOrderKey);
+  if (!rawOrder) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(rawOrder) as Order;
+  } catch {
+    return null;
+  }
+}
+
 function createPaidOrder({
   amount,
   items,

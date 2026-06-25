@@ -5,6 +5,7 @@ export {
 } from './toss-payments';
 export {
   clearPendingTossPayment,
+  getStoredPaidOrder,
   resolveTossPaymentSuccess,
   savePendingTossPayment,
 } from './pending-payment';
