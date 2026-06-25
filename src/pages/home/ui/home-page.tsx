@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { Bell } from 'lucide-react-native';
-import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import {
   categoryLabels,
@@ -11,7 +11,7 @@ import {
 } from '@/entities/product';
 import { ProductCard } from '@/entities/product/ui';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
-import { AppText, Button, IconButton, Screen } from '@/shared/ui';
+import { AppText, Button, DraggableScrollView, IconButton, Screen } from '@/shared/ui';
 
 const GRID_GAP = Spacing.three;
 const SCREEN_PADDING = Spacing.six;
@@ -38,7 +38,7 @@ export default function HomePage() {
         />
       </View>
 
-      <ScrollView
+      <DraggableScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.railContent}
@@ -53,7 +53,7 @@ export default function HomePage() {
             {categoryLabels[item]}
           </Button>
         ))}
-      </ScrollView>
+      </DraggableScrollView>
 
       <View style={styles.feed}>
         {products.map((product) => (

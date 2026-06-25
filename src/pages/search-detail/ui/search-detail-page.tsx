@@ -1,6 +1,8 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
+  Animated,
+  PanResponder,
   Pressable,
   StyleSheet,
   useWindowDimensions,
@@ -23,6 +25,7 @@ const GRID_GAP = Spacing.three;
 const PRICE_MAX = 90000;
 const PRICE_MIN = 0;
 const SCREEN_PADDING = Spacing.six;
+const SHEET_DISMISS_DISTANCE = 96;
 
 type PriceRange = {
   max?: number;
@@ -53,6 +56,7 @@ export default function SearchDetailPage() {
   const [draftPriceInputs, setDraftPriceInputs] = useState<PriceInputValues>(
     toPriceInputValues(priceRange)
   );
+  const sheetTranslateY = useRef(new Animated.Value(0)).current;
   const products = useMemo(
     () =>
       searchProducts({
@@ -67,8 +71,41 @@ export default function SearchDetailPage() {
   const boundedWidth = Math.max(width, 320);
   const contentWidth = Math.min(boundedWidth, MaxContentWidth) - SCREEN_PADDING * 2 - Spacing.four;
   const itemWidth = (contentWidth - GRID_GAP * (columnCount - 1)) / columnCount;
+  const closeFilters = useCallback(() => {
+    sheetTranslateY.setValue(0);
+    setSheetOpen(false);
+  }, [sheetTranslateY]);
+  const sheetPanResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onMoveShouldSetPanResponder: (_event, gestureState) =>
+          gestureState.dy > 8 && Math.abs(gestureState.dy) > Math.abs(gestureState.dx),
+        onPanResponderMove: (_event, gestureState) => {
+          sheetTranslateY.setValue(Math.max(0, gestureState.dy));
+        },
+        onPanResponderRelease: (_event, gestureState) => {
+          if (gestureState.dy > SHEET_DISMISS_DISTANCE || gestureState.vy > 0.9) {
+            closeFilters();
+            return;
+          }
+
+          Animated.spring(sheetTranslateY, {
+            toValue: 0,
+            useNativeDriver: true,
+          }).start();
+        },
+        onPanResponderTerminate: () => {
+          Animated.spring(sheetTranslateY, {
+            toValue: 0,
+            useNativeDriver: true,
+          }).start();
+        },
+      }),
+    [closeFilters, sheetTranslateY]
+  );
 
   function openFilters() {
+    sheetTranslateY.setValue(0);
     setDraftCategory(category);
     setDraftPriceInputs(toPriceInputValues(priceRange));
     setSheetOpen(true);
@@ -99,7 +136,7 @@ export default function SearchDetailPage() {
 
     setCategory(draftCategory);
     setPriceRange(nextPriceRange);
-    setSheetOpen(false);
+    closeFilters();
     router.replace({
       pathname: '/search-detail/[category]',
       params: nextParams,
@@ -169,14 +206,18 @@ export default function SearchDetailPage() {
         <View style={styles.sheetLayer}>
           <Pressable
             style={[styles.backdrop, { backgroundColor: theme.overlay }]}
-            onPress={() => setSheetOpen(false)}
+            onPress={closeFilters}
           />
-          <View
+          <Animated.View
+            {...sheetPanResponder.panHandlers}
             style={[
               styles.sheet,
               {
                 backgroundColor: theme.surface,
                 borderColor: theme.line,
+              },
+              {
+                transform: [{ translateY: sheetTranslateY }],
               },
             ]}>
             <View style={[styles.sheetHandle, { backgroundColor: theme.lineStrong }]} />
@@ -225,7 +266,7 @@ export default function SearchDetailPage() {
                 적용
               </Button>
             </View>
-          </View>
+          </Animated.View>
         </View>
       )}
     </View>

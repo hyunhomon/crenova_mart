@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Check, ChevronDown } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { getProductById, getRelatedProducts } from '@/entities/product';
 import { ProductOption } from '@/entities/product/model/types';
@@ -11,7 +11,7 @@ import { useCart } from '@/features/cart/model';
 import { MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { formatKRW } from '@/shared/lib';
-import { AppText, Badge, Button, Card, Screen } from '@/shared/ui';
+import { AppText, Badge, Button, Card, DraggableScrollView, Screen } from '@/shared/ui';
 
 const PURCHASE_BAR_SPACE = 156;
 
@@ -131,7 +131,7 @@ export default function ProductDetailPage() {
           <AppText color="textSecondary" variant="label">
             다른 상품
           </AppText>
-          <ScrollView
+          <DraggableScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.relatedList}>
@@ -142,7 +142,7 @@ export default function ProductDetailPage() {
                 style={styles.relatedCard}
               />
             ))}
-          </ScrollView>
+          </DraggableScrollView>
         </View>
       </Screen>
 
