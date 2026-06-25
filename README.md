@@ -31,6 +31,17 @@ Web smoke test:
 bun expo start --web
 ```
 
+## GitHub Release
+
+태그를 push하면 GitHub Actions가 Android release APK를 빌드하고 GitHub Release에 첨부합니다.
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+Android package name은 `com.crenova.fandomand`입니다. 새 APK를 같은 기기에 업데이트 설치하려면 `app.json`의 `expo.android.versionCode`를 올린 뒤 태그를 생성합니다.
+
 ## Environment
 
 현재 결제는 외부 PG 연동 없이 앱 내부 목업 결제창으로 동작합니다. 별도 `.env` 값이나 테스트 키가 필요하지 않습니다.

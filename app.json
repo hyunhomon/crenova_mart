@@ -19,7 +19,8 @@
       },
       "softwareKeyboardLayoutMode": "resize",
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.fandomand"
+      "package": "com.crenova.fandomand",
+      "versionCode": 1
     },
     "web": {
       "output": "static",
