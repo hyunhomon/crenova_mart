@@ -3,5 +3,13 @@ export {
   categoryLabels,
   getProductById,
   getProductsByCategory,
+  searchProducts,
+  sortLabels,
 } from './model/selectors';
-export type { DeliveryProfile, Product, ProductCategory, ProductOption } from './model/types';
+export type {
+  DeliveryProfile,
+  Product,
+  ProductCategory,
+  ProductOption,
+  ProductSort,
+} from './model/types';

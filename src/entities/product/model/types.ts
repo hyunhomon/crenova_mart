@@ -1,5 +1,7 @@
 export type ProductCategory = 'all' | 'light-stick' | 'album' | 'apparel' | 'photo-card' | 'goods';
 
+export type ProductSort = 'recommended' | 'price-low' | 'price-high';
+
 export type DeliveryProfile = {
   badgeLabel: string;
   fee: number;
