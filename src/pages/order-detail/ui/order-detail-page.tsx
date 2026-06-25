@@ -88,10 +88,7 @@ export default function OrderDetailPage() {
                   return;
                 }
 
-                router.push({
-                  params: { productId: product.id },
-                  pathname: '/product/[productId]',
-                });
+                router.push(`/product/${encodeURIComponent(product.id)}` as never);
               }}
               onStartShouldSetResponder={() => Boolean(product)}>
               {product && (

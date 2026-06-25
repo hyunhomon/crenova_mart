@@ -8,27 +8,6 @@
   --font-serif: Georgia, 'Times New Roman', serif;
 }
 
-@font-face {
-  font-family: 'Pretendard';
-  font-style: normal;
-  font-weight: 400;
-  src: url('../assets/fonts/Pretendard-Regular.otf') format('opentype');
-}
-
-@font-face {
-  font-family: 'Pretendard';
-  font-style: normal;
-  font-weight: 600;
-  src: url('../assets/fonts/Pretendard-SemiBold.otf') format('opentype');
-}
-
-@font-face {
-  font-family: 'Pretendard';
-  font-style: normal;
-  font-weight: 700;
-  src: url('../assets/fonts/Pretendard-Bold.otf') format('opentype');
-}
-
 html,
 body,
 #root {

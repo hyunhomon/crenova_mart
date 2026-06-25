@@ -5,6 +5,7 @@ const DATABASE_VERSION = 1;
 
 let databasePromise: Promise<SQLite.SQLiteDatabase> | null = null;
 let migrationPromise: Promise<void> | null = null;
+let pragmasPromise: Promise<void> | null = null;
 
 export async function getAppDb() {
   if (!databasePromise) {
@@ -13,6 +14,12 @@ export async function getAppDb() {
 
   const db = await databasePromise;
 
+  if (!pragmasPromise) {
+    pragmasPromise = enableDbPragmas(db);
+  }
+
+  await pragmasPromise;
+
   if (!migrationPromise) {
     migrationPromise = migrateDb(db);
   }
@@ -20,6 +27,13 @@ export async function getAppDb() {
   await migrationPromise;
 
   return db;
+}
+
+async function enableDbPragmas(db: SQLite.SQLiteDatabase) {
+  await db.execAsync(`
+    PRAGMA journal_mode = WAL;
+    PRAGMA foreign_keys = ON;
+  `);
 }
 
 async function migrateDb(db: SQLite.SQLiteDatabase) {
@@ -32,9 +46,6 @@ async function migrateDb(db: SQLite.SQLiteDatabase) {
 
   if (currentVersion === 0) {
     await db.execAsync(`
-      PRAGMA journal_mode = WAL;
-      PRAGMA foreign_keys = ON;
-
       CREATE TABLE IF NOT EXISTS cart_lines (
         id TEXT PRIMARY KEY NOT NULL,
         product_id TEXT NOT NULL,

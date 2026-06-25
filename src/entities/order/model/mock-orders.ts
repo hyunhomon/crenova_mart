@@ -21,7 +21,7 @@ export function createMockOrders(products: Product[]): Order[] {
       orderNumber: 'FD-20260625-001',
       payment: {
         approvedAt: '2026-06-25T09:31:00+09:00',
-        method: 'toss-payments-card',
+        method: 'kb-card',
         totalAmount: first.price + first.delivery.fee,
       },
       status: 'shipping',
@@ -48,7 +48,7 @@ export function createMockOrders(products: Product[]): Order[] {
       orderNumber: 'FD-20260623-002',
       payment: {
         approvedAt: '2026-06-23T16:11:00+09:00',
-        method: 'toss-payments-card',
+        method: 'kb-card',
         totalAmount: second.price + third.price * 2 + second.delivery.fee + third.delivery.fee,
       },
       status: 'delivered',
@@ -68,7 +68,7 @@ export function createMockOrders(products: Product[]): Order[] {
       orderNumber: 'FD-20260619-003',
       payment: {
         approvedAt: '2026-06-19T12:25:00+09:00',
-        method: 'toss-payments-transfer',
+        method: 'kb-bank',
         totalAmount: third.price + third.delivery.fee,
       },
       status: 'preparing',

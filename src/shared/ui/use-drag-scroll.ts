@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useRef } from 'react';
 import {
   PanResponder,
-  Platform,
   ScrollView,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -19,7 +18,7 @@ export function useDragScroll(axis: DragAxis, enabled = true) {
   const scrollRef = useRef<ScrollView>(null);
   const offsetRef = useRef({ x: 0, y: 0 });
   const dragStartRef = useRef<DragStart | null>(null);
-  const enabledOnWeb = Platform.OS === 'web' && enabled;
+  const enabledOnWeb = process.env.EXPO_OS === 'web' && enabled;
   const panResponder = useMemo(
     () =>
       // eslint-disable-next-line react-hooks/refs

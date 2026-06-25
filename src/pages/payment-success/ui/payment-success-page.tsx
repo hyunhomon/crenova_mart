@@ -1,11 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Order } from '@/entities/order';
 import { useCart } from '@/features/cart/model';
 import { useOrders } from '@/features/orders/model';
-import { resolveTossPaymentSuccess, TossPaymentSuccessParams } from '@/features/payment/toss/model';
+import { MockPaymentSuccessParams, resolveMockPaymentSuccess } from '@/features/payment/mock/model';
 import { Spacing } from '@/constants/theme';
 import { formatKRW } from '@/shared/lib';
 import { AppText, Button, Card, Screen } from '@/shared/ui';
@@ -33,12 +33,11 @@ const copy = {
 };
 
 export default function PaymentSuccessPage() {
-  const params = useLocalSearchParams<TossPaymentSuccessParams>();
+  const params = useLocalSearchParams<MockPaymentSuccessParams>();
   const cart = useCart();
   const orders = useOrders();
   const [result, setResult] = useState<PaymentResolution | null>(null);
   const hasResolvedRef = useRef(false);
-  const paramKey = useMemo(() => JSON.stringify(params), [params]);
 
   useEffect(() => {
     if (!cart.isReady || !orders.isReady || hasResolvedRef.current) {
@@ -48,18 +47,25 @@ export default function PaymentSuccessPage() {
     hasResolvedRef.current = true;
 
     async function resolvePayment() {
-      const nextResult = await resolveTossPaymentSuccess(params);
+      const nextResult = await resolveMockPaymentSuccess(params);
 
       if (nextResult.isValid && nextResult.order) {
-        await orders.addOrder(nextResult.order);
-        cart.clearCart();
+        setResult(nextResult as PaymentResolution);
+
+        runWhenIdle(() => {
+          void orders.addOrder(nextResult.order).catch((error) => {
+            console.error('Failed to save paid order.', error);
+          });
+          cart.clearCart();
+        });
+        return;
       }
 
       setResult(nextResult as PaymentResolution);
     }
 
     void resolvePayment();
-  }, [cart, orders, paramKey, params]);
+  }, [cart, orders, params]);
 
   if (!result) {
     return (
@@ -120,3 +126,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
 });
+
+function runWhenIdle(task: () => void) {
+  if (typeof requestIdleCallback === 'function') {
+    requestIdleCallback(task);
+    return;
+  }
+
+  setTimeout(task, 0);
+}

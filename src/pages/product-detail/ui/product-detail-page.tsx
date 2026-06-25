@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Check, ChevronDown } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { getProductById, getRelatedProducts } from '@/entities/product';
 import { ProductOption } from '@/entities/product/model/types';
@@ -22,6 +23,7 @@ export default function ProductDetailPage() {
   const [selectedOptionId, setSelectedOptionId] = useState(product?.options[0]?.id);
   const cart = useCart();
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
   const selectedOption = useMemo(
     () => product?.options.find((option) => option.id === selectedOptionId) ?? product?.options[0],
@@ -87,7 +89,11 @@ export default function ProductDetailPage() {
 
   return (
     <View style={[styles.root, { backgroundColor: theme.background }]}>
-      <Screen contentContainerStyle={[styles.content, { paddingBottom: PURCHASE_BAR_SPACE }]}>
+      <Screen
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: PURCHASE_BAR_SPACE + insets.bottom },
+        ]}>
         <Image contentFit="cover" source={product.imageUrl} style={styles.heroImage} />
 
         <View style={styles.summary}>
@@ -154,7 +160,7 @@ export default function ProductDetailPage() {
             borderTopColor: theme.line,
           },
         ]}>
-        <View style={styles.purchaseContent}>
+        <View style={[styles.purchaseContent, { paddingBottom: Spacing.four + insets.bottom }]}>
           <View style={styles.purchaseTopRow}>
             <AppText color="textSecondary" variant="label">
               수량

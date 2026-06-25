@@ -23,10 +23,7 @@ export function ProductCard({ product, style }: ProductCardProps) {
     <View style={style}>
       <Link
         asChild
-        href={{
-          params: { productId: product.id },
-          pathname: '/product/[productId]',
-        }}>
+        href={`/product/${encodeURIComponent(product.id)}` as never}>
         <Pressable style={({ pressed }) => [styles.root, pressed && styles.pressed]}>
           <Card padded={false} style={styles.card} variant="ghost">
             <Image contentFit="cover" source={product.imageUrl} style={styles.image} />

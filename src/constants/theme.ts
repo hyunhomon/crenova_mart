@@ -1,7 +1,5 @@
 import '@/global.css';
 
-import { Platform } from 'react-native';
-
 export const Brand = {
   name: '팬덤&',
   primary: '#FAFAFA',
@@ -54,36 +52,26 @@ export const Colors = {
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'Pretendard-Regular',
-    sansSemiBold: 'Pretendard-SemiBold',
-    sansBold: 'Pretendard-Bold',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'Pretendard-SemiBold',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'Pretendard-Regular',
-    sansSemiBold: 'Pretendard-SemiBold',
-    sansBold: 'Pretendard-Bold',
-    serif: 'serif',
-    rounded: 'Pretendard-SemiBold',
-    mono: 'monospace',
-  },
-  web: {
-    sans: 'Pretendard',
-    sansSemiBold: 'Pretendard',
-    sansBold: 'Pretendard',
-    serif: 'var(--font-serif)',
-    rounded: 'Pretendard-SemiBold',
-    mono: 'var(--font-mono)',
-  },
-});
+const nativeFonts = {
+  sans: 'Pretendard-Regular',
+  sansSemiBold: 'Pretendard-SemiBold',
+  sansBold: 'Pretendard-Bold',
+  serif: 'serif',
+  rounded: 'Pretendard-SemiBold',
+  mono: 'monospace',
+} as const;
+
+export const Fonts =
+  process.env.EXPO_OS === 'web'
+    ? {
+        sans: 'Pretendard',
+        sansSemiBold: 'Pretendard',
+        sansBold: 'Pretendard',
+        serif: 'var(--font-serif)',
+        rounded: 'Pretendard-SemiBold',
+        mono: 'var(--font-mono)',
+      }
+    : nativeFonts;
 
 export const Spacing = {
   half: 2,
@@ -135,5 +123,6 @@ export const Typography = {
   },
 } as const;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80, web: 78 }) ?? 0;
+export const BottomTabInset =
+  process.env.EXPO_OS === 'ios' ? 50 : process.env.EXPO_OS === 'web' ? 78 : 80;
 export const MaxContentWidth = 640;

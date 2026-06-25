@@ -15,7 +15,7 @@ import {
   loadSearchPreferences,
   saveSearchDraftQuery,
 } from '@/features/search/model';
-import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { Fonts, MaxContentWidth, Spacing } from '@/constants/theme';
 import { AppText, Button, Screen, SearchField } from '@/shared/ui';
 
 const GRID_GAP = Spacing.three;
@@ -87,22 +87,26 @@ export default function SearchPage() {
     };
   }, [params.query]);
 
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      void saveSearchDraftQuery(query);
+    }, 250);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [query]);
+
   async function openSearchDetail(nextCategory: ProductCategory, nextQuery = query) {
     await recordSearch(nextQuery);
 
-    router.push({
-      pathname: '/search-detail/[category]',
-      params: {
-        category: nextCategory,
-        query: nextQuery,
-      },
-    });
+    const params = new URLSearchParams({ query: nextQuery });
+
+    router.push(`/search-detail/${nextCategory}?${params.toString()}` as never);
   }
 
   function updateQuery(nextQuery: string) {
     setQuery(nextQuery);
-    router.setParams({ query: nextQuery });
-    void saveSearchDraftQuery(nextQuery);
   }
 
   async function recordSearch(nextQuery: string) {
@@ -147,7 +151,12 @@ export default function SearchPage() {
         </AppText>
         <View style={styles.chipRow}>
           {productCategories.map((item) => (
-            <Button key={item} size="sm" variant="ghost" onPress={() => openSearchDetail(item)}>
+            <Button
+              key={item}
+              size="sm"
+              textStyle={styles.categoryChipText}
+              variant="secondary"
+              onPress={() => openSearchDetail(item)}>
               {categoryLabels[item]}
             </Button>
           ))}
@@ -172,6 +181,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Spacing.two,
+  },
+  categoryChipText: {
+    fontFamily: Fonts.sans,
+    fontWeight: '400',
   },
   section: {
     gap: Spacing.three,

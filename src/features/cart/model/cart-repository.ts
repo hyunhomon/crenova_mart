@@ -27,17 +27,19 @@ export async function loadCartLines(): Promise<CartLine[]> {
 export async function saveCartLines(lines: CartLine[]) {
   const db = await getAppDb();
 
-  await db.runAsync('DELETE FROM cart_lines');
+  await db.withTransactionAsync(async () => {
+    await db.runAsync('DELETE FROM cart_lines');
 
-  for (const line of lines) {
-    await db.runAsync(
-      `INSERT INTO cart_lines (id, product_id, option_id, quantity, updated_at)
-       VALUES (?, ?, ?, ?, ?)`,
-      line.id,
-      line.productId,
-      line.optionId,
-      line.quantity,
-      new Date().toISOString()
-    );
-  }
+    for (const line of lines) {
+      await db.runAsync(
+        `INSERT INTO cart_lines (id, product_id, option_id, quantity, updated_at)
+         VALUES (?, ?, ?, ?, ?)`,
+        line.id,
+        line.productId,
+        line.optionId,
+        line.quantity,
+        new Date().toISOString()
+      );
+    }
+  });
 }

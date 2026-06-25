@@ -8,6 +8,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -27,6 +28,7 @@ export function Screen({
   ...props
 }: ScreenProps) {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const { dragScrollHandlers, scrollRef, updateDragScrollOffset } = useDragScroll('y');
 
   useFocusEffect(
@@ -52,7 +54,11 @@ export function Screen({
         ref={scrollRef}
         contentInsetAdjustmentBehavior="automatic"
         style={styles.scroll}
-        contentContainerStyle={[styles.content, contentContainerStyle]}
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: insets.top + Spacing.six },
+          contentContainerStyle,
+        ]}
         scrollEventThrottle={scrollEventThrottle}
         showsVerticalScrollIndicator={showsVerticalScrollIndicator}
         onScroll={handleScroll}

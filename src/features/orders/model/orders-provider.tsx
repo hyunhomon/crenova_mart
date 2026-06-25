@@ -59,12 +59,13 @@ export function OrdersProvider({ children }: OrdersProviderProps) {
   }, []);
 
   const addOrder = useCallback(async (order: Order) => {
-    await saveOrderToDb(order);
     setOrders((currentOrders) => {
       const nextOrders = [order, ...currentOrders.filter((item) => item.id !== order.id)];
 
       return sortOrders(nextOrders);
     });
+
+    await saveOrderToDb(order);
   }, []);
 
   const store = useMemo<OrdersStore>(

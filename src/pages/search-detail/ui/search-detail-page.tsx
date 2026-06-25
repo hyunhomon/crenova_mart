@@ -17,7 +17,7 @@ import {
 } from '@/entities/product';
 import { ProductCard } from '@/entities/product/ui';
 import { saveSearchDraftQuery, saveSearchFilters } from '@/features/search/model';
-import { BottomTabInset, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
+import { Fonts, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { formatKRW } from '@/shared/lib';
 import { AppText, Button, Card, Screen, SearchField, TextField } from '@/shared/ui';
@@ -121,22 +121,14 @@ export default function SearchDetailPage() {
       max: parsePriceInput(draftPriceInputs.max),
       min: parsePriceInput(draftPriceInputs.min),
     });
-    const nextParams: {
-      category: ProductCategory;
-      maxPrice?: string;
-      minPrice?: string;
-      query: string;
-    } = {
-      category: draftCategory,
-      query,
-    };
+    const nextParams = new URLSearchParams({ query });
 
     if (nextPriceRange.max !== undefined) {
-      nextParams.maxPrice = String(nextPriceRange.max);
+      nextParams.set('maxPrice', String(nextPriceRange.max));
     }
 
     if (nextPriceRange.min !== undefined) {
-      nextParams.minPrice = String(nextPriceRange.min);
+      nextParams.set('minPrice', String(nextPriceRange.min));
     }
 
     setCategory(draftCategory);
@@ -147,10 +139,7 @@ export default function SearchDetailPage() {
       minPrice: nextPriceRange.min,
     });
     closeFilters();
-    router.replace({
-      pathname: '/search-detail/[category]',
-      params: nextParams,
-    });
+    router.replace(`/search-detail/${draftCategory}?${nextParams.toString()}` as never);
   }
 
   function resetFilters() {
@@ -172,10 +161,9 @@ export default function SearchDetailPage() {
   }
 
   function openSearchHome() {
-    router.replace({
-      pathname: '/search',
-      params: { focus: '1', query },
-    });
+    const params = new URLSearchParams({ focus: '1', query });
+
+    router.replace(`/search?${params.toString()}` as never);
   }
 
   return (
@@ -241,7 +229,8 @@ export default function SearchDetailPage() {
                   <Button
                     key={item}
                     size="sm"
-                    variant={item === draftCategory ? 'inverted' : 'ghost'}
+                    textStyle={styles.categoryChipText}
+                    variant={item === draftCategory ? 'inverted' : 'secondary'}
                     onPress={() => setDraftCategory(item)}>
                     {categoryLabels[item]}
                   </Button>
@@ -415,6 +404,10 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: Spacing.two,
   },
+  categoryChipText: {
+    fontFamily: Fonts.sans,
+    fontWeight: '400',
+  },
   content: {
     paddingBottom: Spacing.eight,
   },
@@ -485,7 +478,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'flex-end',
     left: 0,
-    paddingBottom: BottomTabInset + Spacing.four,
+    paddingBottom: Spacing.two,
     paddingHorizontal: Spacing.four,
     paddingTop: Spacing.four,
     position: 'absolute',

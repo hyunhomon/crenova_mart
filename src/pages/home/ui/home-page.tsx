@@ -10,7 +10,7 @@ import {
   ProductCategory,
 } from '@/entities/product';
 import { ProductCard } from '@/entities/product/ui';
-import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { Fonts, MaxContentWidth, Spacing } from '@/constants/theme';
 import { AppText, Button, DraggableScrollView, IconButton, Screen } from '@/shared/ui';
 
 const GRID_GAP = Spacing.three;
@@ -48,7 +48,8 @@ export default function HomePage() {
             key={item}
             size="sm"
             style={styles.railTab}
-            variant={item === category ? 'inverted' : 'ghost'}
+            textStyle={styles.railTabText}
+            variant={item === category ? 'inverted' : 'secondary'}
             onPress={() => setCategory(item)}>
             {categoryLabels[item]}
           </Button>
@@ -83,6 +84,10 @@ const styles = StyleSheet.create({
   },
   railTab: {
     minHeight: 36,
+  },
+  railTabText: {
+    fontFamily: Fonts.sans,
+    fontWeight: '400',
   },
   topBar: {
     alignItems: 'center',

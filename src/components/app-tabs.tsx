@@ -16,6 +16,7 @@ export default function AppTabs() {
         default: { color: colors.textTertiary },
         selected: { color: colors.text },
       }}
+      labelVisibilityMode="labeled"
       minimizeBehavior="onScrollDown"
       tintColor={colors.brand}>
       <NativeTabs.Trigger name="index">
