@@ -33,10 +33,7 @@ export default function CartPage() {
                 key={item.id}
                 style={({ pressed }) => [pressed && styles.pressed]}
                 onPress={() =>
-                  router.push({
-                    pathname: '/product/[productId]',
-                    params: { productId: item.product.id },
-                  })
+                  router.push(`/product/${encodeURIComponent(item.product.id)}` as never)
                 }>
                 <Card style={styles.cartItem}>
                   <Image contentFit="cover" source={item.product.imageUrl} style={styles.image} />

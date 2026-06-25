@@ -38,10 +38,7 @@ export default function OrdersPage() {
             <Link
               asChild
               key={order.id}
-              href={{
-                params: { orderId: order.id },
-                pathname: '/orders/[orderId]',
-              }}>
+              href={`/orders/${encodeURIComponent(order.id)}` as never}>
               <Pressable style={({ pressed }) => pressed && styles.pressed}>
                 <Card style={styles.orderCard}>
                   <View style={styles.orderHeader}>

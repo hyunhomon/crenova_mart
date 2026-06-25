@@ -17,6 +17,15 @@ const notificationIcon: Record<NotificationKind, ComponentType<{ color?: string;
 export default function NotificationsPage() {
   const theme = useTheme();
 
+  function closeNotifications() {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    router.replace('/');
+  }
+
   return (
     <Screen>
       <View style={styles.topBar}>
@@ -24,8 +33,9 @@ export default function NotificationsPage() {
         <IconButton
           accessibilityLabel="닫기"
           icon={X}
-          size="sm"
-          onPress={() => router.replace('/')}
+          hitSlop={Spacing.four}
+          size="md"
+          onPress={closeNotifications}
         />
       </View>
 

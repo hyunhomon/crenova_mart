@@ -1,15 +1,15 @@
 import { OrderItem } from '@/entities/order';
 
-export type PendingTossPayment = {
+export type PendingMockPayment = {
   amount: number;
   items: OrderItem[];
   orderId: string;
   orderName: string;
 };
 
-export type TossPaymentSuccessParams = {
+export type MockPaymentSuccessParams = {
   amount?: string;
   expectedAmount?: string;
   orderId?: string;
-  paymentKey?: string;
+  transactionId?: string;
 };

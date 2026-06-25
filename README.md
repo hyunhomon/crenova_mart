@@ -1,6 +1,6 @@
 # 팬덤&
 
-Expo SDK 56 기반의 온라인 팬 커머스 목업 앱입니다. 상품 피드, 검색, 상세, 장바구니, 체크아웃, 토스페이먼츠 테스트 결제 redirect, 주문/배송 상태 흐름을 FSD 구조로 구성합니다.
+Expo SDK 56 기반의 온라인 팬 커머스 목업 앱입니다. 상품 피드, 검색, 상세, 장바구니, 주문서, 앱 내부 목업 결제창, 주문/배송 상태 흐름을 FSD 구조로 구성합니다.
 
 ## Stack
 
@@ -18,6 +18,13 @@ bun install
 bun expo start
 ```
 
+Android dev client:
+
+```bash
+bun expo run:android
+bun expo start --dev-client
+```
+
 Web smoke test:
 
 ```bash
@@ -26,13 +33,7 @@ bun expo start --web
 
 ## Environment
 
-토스페이먼츠 결제창 테스트를 실행하려면 공개 테스트 클라이언트 키만 설정합니다. Secret key는 클라이언트 앱에 넣지 않습니다.
-
-```bash
-EXPO_PUBLIC_TOSS_CLIENT_KEY=your_test_client_key
-```
-
-키가 없으면 체크아웃 화면에서 결제 버튼을 눌렀을 때 키 필요 상태가 표시됩니다.
+현재 결제는 외부 PG 연동 없이 앱 내부 목업 결제창으로 동작합니다. 별도 `.env` 값이나 테스트 키가 필요하지 않습니다.
 
 ## Verification
 
@@ -47,8 +48,8 @@ Manual flow:
 2. 상세에서 장바구니 담기 또는 바로 구매
 3. 장바구니에서 수량 변경, 삭제, 구매하기
 4. 주문서에서 결제하기
-5. 토스 redirect 성공/실패 route 확인
-6. 주문 탭에서 배송 중, 배송 완료, 완료된 물품 확인
+5. 목업 결제창에서 결제 완료 또는 닫기
+6. 주문 탭에서 배송 상태와 완료된 주문 확인
 
 ## Architecture
 

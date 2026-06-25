@@ -9,14 +9,10 @@ import {
 } from 'lucide-react-native';
 
 import { Radius, Spacing } from '@/constants/theme';
+import { useCart } from '@/features/cart/model';
+import { useOrders } from '@/features/orders/model';
 import { useTheme } from '@/hooks/use-theme';
 import { AppText, Card, Screen } from '@/shared/ui';
-
-const stats = [
-  ['10', '장바구니'],
-  ['0', '진행중'],
-  ['12만', '배송 완료'],
-] as const;
 
 const supportRows = [
   { icon: Headphones, label: '고객센터' },
@@ -38,6 +34,13 @@ const businessFooterLines = [
 
 export default function ProfilePage() {
   const theme = useTheme();
+  const cart = useCart();
+  const orders = useOrders();
+  const stats = [
+    [formatStatCount(cart.summary.itemCount), '장바구니'],
+    [formatStatCount(orders.getOrdersByStatus('active').length), '진행중'],
+    [formatStatCount(orders.getOrdersByStatus('delivered').length), '배송 완료'],
+  ] as const;
 
   return (
     <Screen contentContainerStyle={styles.content}>
@@ -95,6 +98,10 @@ export default function ProfilePage() {
       </Card>
     </Screen>
   );
+}
+
+function formatStatCount(count: number) {
+  return count >= 10000 ? `${Math.floor(count / 10000)}만` : String(count);
 }
 
 const styles = StyleSheet.create({

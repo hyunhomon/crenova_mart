@@ -8,7 +8,7 @@ type OrderRow = {
   order_number: string;
   payment_approved_at: string;
   payment_key: string | null;
-  payment_method: PaymentMethod;
+  payment_method: string;
   status: DeliveryStatus;
   total_amount: number;
 };
@@ -24,6 +24,9 @@ type OrderItemRow = {
 
 export async function loadOrdersFromDb(): Promise<Order[]> {
   const db = await getAppDb();
+
+  await removeEmptyOrders(db);
+
   const orderRows = await db.getAllAsync<OrderRow>(
     `SELECT id, order_number, status, created_at, payment_approved_at, payment_method,
             payment_key, total_amount
@@ -37,29 +40,35 @@ export async function loadOrdersFromDb(): Promise<Order[]> {
   );
   const itemsByOrderId = groupOrderItems(itemRows);
 
-  return orderRows.map((row) => ({
-    createdAt: row.created_at,
-    id: row.id,
-    items: itemsByOrderId.get(row.id) ?? [],
-    orderNumber: row.order_number,
-    payment: {
-      approvedAt: row.payment_approved_at,
-      method: row.payment_method,
-      paymentKey: row.payment_key ?? undefined,
-      totalAmount: row.total_amount,
-    },
-    status: row.status,
-  }));
+  return orderRows
+    .map((row) => ({
+      createdAt: row.created_at,
+      id: row.id,
+      items: itemsByOrderId.get(row.id) ?? [],
+      orderNumber: row.order_number,
+      payment: {
+        approvedAt: row.payment_approved_at,
+        method: normalizePaymentMethod(row.payment_method),
+        paymentKey: row.payment_key ?? undefined,
+        totalAmount: row.total_amount,
+      },
+      status: row.status,
+    }))
+    .filter((order) => order.items.length > 0);
 }
 
 export async function saveOrderToDb(order: Order) {
   const db = await getAppDb();
 
-  await upsertOrder(db, order);
+  await db.withTransactionAsync(async () => {
+    await upsertOrder(db, order);
+  });
 }
 
 export async function seedOrdersIfEmpty(seedOrders: Order[]) {
   const db = await getAppDb();
+  await removeEmptyOrders(db);
+
   const row = await db.getFirstAsync<{ count: number }>('SELECT COUNT(*) AS count FROM orders');
 
   if ((row?.count ?? 0) > 0) {
@@ -89,13 +98,13 @@ async function upsertOrder(db: Pick<Awaited<ReturnType<typeof getAppDb>>, 'runAs
   );
   await db.runAsync('DELETE FROM order_items WHERE order_id = ?', order.id);
 
-  for (const item of order.items) {
+  for (const [index, item] of order.items.entries()) {
     await db.runAsync(
       `INSERT INTO order_items (
          id, order_id, product_id, product_name, quantity, unit_price
        )
        VALUES (?, ?, ?, ?, ?, ?)`,
-      item.id,
+      createOrderItemId(order.id, index),
       order.id,
       item.productId,
       item.productName,
@@ -103,6 +112,20 @@ async function upsertOrder(db: Pick<Awaited<ReturnType<typeof getAppDb>>, 'runAs
       item.unitPrice
     );
   }
+}
+
+async function removeEmptyOrders(db: Pick<Awaited<ReturnType<typeof getAppDb>>, 'runAsync'>) {
+  await db.runAsync(`
+    DELETE FROM orders
+    WHERE id NOT IN (
+      SELECT DISTINCT order_id
+      FROM order_items
+    )
+  `);
+}
+
+function createOrderItemId(orderId: string, index: number) {
+  return `${orderId}:item:${index + 1}`;
 }
 
 function groupOrderItems(rows: OrderItemRow[]) {
@@ -123,4 +146,16 @@ function groupOrderItems(rows: OrderItemRow[]) {
   }
 
   return itemMap;
+}
+
+function normalizePaymentMethod(method: string): PaymentMethod {
+  if (method === 'kb-card' || method === 'kb-bank' || method === 'naver-pay') {
+    return method;
+  }
+
+  if (method.endsWith('-transfer')) {
+    return 'kb-bank';
+  }
+
+  return 'kb-card';
 }

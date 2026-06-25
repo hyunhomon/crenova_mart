@@ -8,7 +8,7 @@ export type ShippingAddress = {
   postalCode: string;
 };
 
-export type PaymentMethod = 'toss-payments-card' | 'toss-payments-transfer';
+export type PaymentMethod = 'kb-card' | 'kb-bank' | 'naver-pay';
 
 export type CheckoutDraft = {
   id: string;
