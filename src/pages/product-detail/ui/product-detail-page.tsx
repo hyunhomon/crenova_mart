@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { getProductById } from '@/entities/product';
 import { ProductOption } from '@/entities/product/model/types';
+import { useCart } from '@/features/cart/model';
 import { formatKRW } from '@/shared/lib';
 import { AppText, Badge, Button, Card, Screen } from '@/shared/ui';
 import { Radius, Spacing } from '@/constants/theme';
@@ -16,6 +17,7 @@ export default function ProductDetailPage() {
   const [added, setAdded] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [selectedOptionId, setSelectedOptionId] = useState(product?.options[0]?.id);
+  const cart = useCart();
 
   const selectedOption = useMemo(
     () => product?.options.find((option) => option.id === selectedOptionId),
@@ -35,12 +37,36 @@ export default function ProductDetailPage() {
     );
   }
 
+  const productIdForCart = product.id;
+
   function updateQuantity(nextQuantity: number) {
     setQuantity(Math.max(1, Math.min(99, nextQuantity)));
   }
 
   function handleBuyNow() {
-    router.push('/cart');
+    if (!selectedOptionId) {
+      return;
+    }
+
+    cart.addItem({
+      optionId: selectedOptionId,
+      productId: productIdForCart,
+      quantity,
+    });
+    router.push('/checkout');
+  }
+
+  function handleAddToCart() {
+    if (!selectedOptionId) {
+      return;
+    }
+
+    cart.addItem({
+      optionId: selectedOptionId,
+      productId: productIdForCart,
+      quantity,
+    });
+    setAdded(true);
   }
 
   return (
@@ -97,7 +123,7 @@ export default function ProductDetailPage() {
           <Button
             style={styles.secondaryAction}
             variant="secondary"
-            onPress={() => setAdded(true)}>
+            onPress={handleAddToCart}>
             장바구니
           </Button>
           <Button fullWidth style={styles.primaryAction} onPress={handleBuyNow}>

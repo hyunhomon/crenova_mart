@@ -2,10 +2,12 @@ import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { useColorScheme } from 'react-native';
 
 import { Colors } from '@/constants/theme';
+import { useCart } from '@/features/cart/model';
 
 export default function AppTabs() {
   const scheme = useColorScheme();
   const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
+  const cart = useCart();
 
   return (
     <NativeTabs
@@ -36,6 +38,9 @@ export default function AppTabs() {
 
       <NativeTabs.Trigger name="cart">
         <NativeTabs.Trigger.Label>장바구니</NativeTabs.Trigger.Label>
+        {cart.summary.itemCount > 0 && (
+          <NativeTabs.Trigger.Badge>{String(cart.summary.itemCount)}</NativeTabs.Trigger.Badge>
+        )}
         <NativeTabs.Trigger.Icon
           md="shopping_cart"
           sf={{ default: 'cart', selected: 'cart.fill' }}
