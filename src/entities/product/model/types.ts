@@ -1,4 +1,21 @@
-export type ProductCategory = 'all' | 'light-stick' | 'album' | 'apparel' | 'photo-card' | 'goods';
+export type ProductCategory =
+  | 'all'
+  | 'women-fashion'
+  | 'men-fashion'
+  | 'food'
+  | 'fresh-food'
+  | 'home-interior'
+  | 'electronics'
+  | 'office'
+  | 'daily-goods'
+  | 'beauty'
+  | 'sports'
+  | 'health'
+  | 'baby'
+  | 'kitchen'
+  | 'pets'
+  | 'toys-hobbies'
+  | 'books-music';
 
 export type ProductSort = 'recommended' | 'price-low' | 'price-high';
 
@@ -18,6 +35,7 @@ export type Product = {
   artist: string;
   category: ProductCategory;
   delivery: DeliveryProfile;
+  description: string;
   id: string;
   imageUrl: string;
   listPrice?: number;

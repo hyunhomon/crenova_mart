@@ -2,12 +2,23 @@ import { mockProducts } from './mock-products';
 import { Product, ProductCategory, ProductSort } from './types';
 
 export const categoryLabels: Record<ProductCategory, string> = {
-  album: '앨범',
   all: '전체',
-  apparel: '의류',
-  goods: '굿즈',
-  'light-stick': '응원봉',
-  'photo-card': '포토카드',
+  baby: '출산/유아동',
+  beauty: '뷰티',
+  'books-music': '도서/음반/DVD',
+  'daily-goods': '생활용품',
+  electronics: '가전디지털',
+  food: '식품',
+  'fresh-food': '신선식품',
+  health: '헬스/건강식품',
+  'home-interior': '홈인테리어',
+  kitchen: '주방용품',
+  'men-fashion': '남성패션',
+  office: '문구/오피스',
+  pets: '반려동물용품',
+  sports: '스포츠/레저',
+  'toys-hobbies': '완구/취미',
+  'women-fashion': '여성패션',
 };
 
 export const sortLabels: Record<ProductSort, string> = {
@@ -28,22 +39,60 @@ export function getProductById(productId: string) {
   return mockProducts.find((product) => product.id === productId);
 }
 
+export function getRelatedProducts(productId: string, limit = 6) {
+  const currentProduct = getProductById(productId);
+
+  if (!currentProduct) {
+    return mockProducts.slice(0, limit);
+  }
+
+  return mockProducts
+    .filter((product) => product.id !== productId)
+    .map((product) => {
+      const sharedTagCount = product.tags.filter((tag) => currentProduct.tags.includes(tag)).length;
+      const score =
+        (product.category === currentProduct.category ? 4 : 0) +
+        (product.artist === currentProduct.artist ? 2 : 0) +
+        sharedTagCount;
+
+      return { product, score };
+    })
+    .sort((left, right) => {
+      if (right.score !== left.score) {
+        return right.score - left.score;
+      }
+
+      return right.product.reviewCount - left.product.reviewCount;
+    })
+    .map(({ product }) => product)
+    .slice(0, limit);
+}
+
 export function searchProducts({
   category,
+  maxPrice,
+  minPrice,
   query,
-  sort,
+  sort = 'recommended',
 }: {
   category: ProductCategory;
+  maxPrice?: number;
+  minPrice?: number;
   query: string;
-  sort: ProductSort;
+  sort?: ProductSort;
 }) {
   const normalizedQuery = query.trim().toLocaleLowerCase('ko-KR');
   const filteredByCategory = getProductsByCategory(category);
   const filteredByQuery = normalizedQuery
     ? filteredByCategory.filter((product) => isProductMatched(product, normalizedQuery))
     : filteredByCategory;
+  const filteredByPrice = filteredByQuery.filter(
+    (product) =>
+      product.price >= (minPrice ?? 0) &&
+      product.price <= (maxPrice ?? Number.POSITIVE_INFINITY)
+  );
 
-  return sortProducts(filteredByQuery, sort);
+  return sortProducts(filteredByPrice, sort);
 }
 
 function isProductMatched(product: Product, normalizedQuery: string) {

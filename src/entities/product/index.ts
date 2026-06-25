@@ -3,6 +3,7 @@ export {
   categoryLabels,
   getProductById,
   getProductsByCategory,
+  getRelatedProducts,
   searchProducts,
   sortLabels,
 } from './model/selectors';

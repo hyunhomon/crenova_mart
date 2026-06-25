@@ -1,23 +1,32 @@
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { formatPaymentMethod } from '@/entities/checkout';
 import {
-  DeliveryStatus,
-  advanceDeliveryStatus,
+  deliveryStatusSteps,
   getDeliveryStatusLabel,
+  isDeliveryStatusReached,
 } from '@/entities/order';
 import { getProductById } from '@/entities/product';
-import { getOrderById, getStatusBadgeVariant } from '@/features/orders/model';
+import { getStatusBadgeVariant, useOrders } from '@/features/orders/model';
 import { formatKRW } from '@/shared/lib';
 import { Radius, Spacing } from '@/constants/theme';
 import { AppText, Badge, Button, Card, Screen } from '@/shared/ui';
 
 export default function OrderDetailPage() {
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
-  const order = getOrderById(orderId);
-  const [status, setStatus] = useState<DeliveryStatus | null>(order?.status ?? null);
+  const orderStore = useOrders();
+  const order = orderStore.getOrderById(orderId);
+  const status = order?.status;
+
+  if (!orderStore.isReady) {
+    return (
+      <Screen>
+        <AppText variant="h1">주문을 불러오고 있어요</AppText>
+      </Screen>
+    );
+  }
 
   if (!order || !status) {
     return (
@@ -41,21 +50,28 @@ export default function OrderDetailPage() {
       <Card style={styles.section}>
         <AppText variant="label">배송</AppText>
         <View style={styles.timeline}>
-          {(['shipping', 'delivered', 'completed'] as DeliveryStatus[]).map((item) => (
-            <View key={item} style={styles.timelineRow}>
-              <View style={[styles.timelineDot, item === status && styles.timelineDotActive]} />
-              <AppText color={item === status ? 'text' : 'textSecondary'}>
-                {getDeliveryStatusLabel(item)}
-              </AppText>
-            </View>
-          ))}
+          {deliveryStatusSteps.map((item) => {
+            const reached = isDeliveryStatusReached(status, item);
+            const current = item === status;
+
+            return (
+              <View key={item} style={styles.timelineRow}>
+                <View
+                  style={[
+                    styles.timelineDot,
+                    reached && styles.timelineDotReached,
+                    current && styles.timelineDotActive,
+                  ]}
+                />
+                <AppText
+                  color={reached ? 'text' : 'textSecondary'}
+                  variant={current ? 'label' : 'body'}>
+                  {getDeliveryStatusLabel(item)}
+                </AppText>
+              </View>
+            );
+          })}
         </View>
-        <Button
-          disabled={status === 'completed'}
-          variant="secondary"
-          onPress={() => setStatus(advanceDeliveryStatus(status))}>
-          상태 변경
-        </Button>
       </Card>
 
       <Card style={styles.section}>
@@ -64,7 +80,20 @@ export default function OrderDetailPage() {
           const product = getProductById(item.productId);
 
           return (
-            <View key={item.id} style={styles.itemRow}>
+            <View
+              key={item.id}
+              style={styles.itemRow}
+              onResponderRelease={() => {
+                if (!product) {
+                  return;
+                }
+
+                router.push({
+                  params: { productId: product.id },
+                  pathname: '/product/[productId]',
+                });
+              }}
+              onStartShouldSetResponder={() => Boolean(product)}>
               {product && (
                 <Image contentFit="cover" source={product.imageUrl} style={styles.image} />
               )}
@@ -84,7 +113,7 @@ export default function OrderDetailPage() {
 
       <Card style={styles.section}>
         <SummaryRow label="결제금액" value={formatKRW(order.payment.totalAmount)} />
-        <SummaryRow label="결제수단" value="토스페이먼츠" />
+        <SummaryRow label="결제수단" value={formatPaymentMethod(order.payment.method)} />
       </Card>
     </Screen>
   );
@@ -136,6 +165,9 @@ const styles = StyleSheet.create({
   },
   timelineDotActive: {
     backgroundColor: '#6D3DFF',
+  },
+  timelineDotReached: {
+    backgroundColor: '#8A909C',
   },
   timelineRow: {
     alignItems: 'center',

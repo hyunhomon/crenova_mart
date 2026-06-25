@@ -7,18 +7,42 @@ import { useTheme } from '@/hooks/use-theme';
 type CardProps = ViewProps & {
   children: ReactNode;
   padded?: boolean;
+  variant?: 'default' | 'muted' | 'inverted' | 'ghost';
 };
 
-export function Card({ children, padded = true, style, ...props }: CardProps) {
+const cardTone = {
+  default: {
+    background: 'surface',
+    border: 'line',
+  },
+  ghost: {
+    background: 'transparent',
+    border: 'transparent',
+  },
+  inverted: {
+    background: 'text',
+    border: 'text',
+  },
+  muted: {
+    background: 'backgroundElement',
+    border: 'line',
+  },
+} as const;
+
+export function Card({ children, padded = true, style, variant = 'default', ...props }: CardProps) {
   const theme = useTheme();
+  const tone = cardTone[variant];
+  const backgroundColor =
+    tone.background === 'transparent' ? 'transparent' : theme[tone.background];
+  const borderColor = tone.border === 'transparent' ? 'transparent' : theme[tone.border];
 
   return (
     <View
       style={[
         styles.root,
         {
-          backgroundColor: theme.surface,
-          borderColor: theme.line,
+          backgroundColor,
+          borderColor,
         },
         padded && styles.padded,
         style,
@@ -71,7 +95,7 @@ const styles = StyleSheet.create({
   },
   root: {
     borderCurve: 'continuous',
-    borderRadius: Radius.xl,
+    borderRadius: Radius.md,
     borderWidth: 1,
     gap: Spacing.four,
   },

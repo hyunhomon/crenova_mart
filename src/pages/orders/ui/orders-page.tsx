@@ -2,19 +2,21 @@ import { useState } from 'react';
 import { Link } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { DeliveryStatus, getDeliveryStatusLabel } from '@/entities/order';
+import { formatOrderTitle, getDeliveryStatusLabel } from '@/entities/order';
 import {
-  getOrdersByStatus,
   getStatusBadgeVariant,
+  OrderStatusFilter,
   orderStatusOptions,
+  useOrders,
 } from '@/features/orders/model';
 import { formatKRW } from '@/shared/lib';
 import { Spacing } from '@/constants/theme';
 import { AppText, Badge, Card, Screen, SegmentedControl } from '@/shared/ui';
 
 export default function OrdersPage() {
-  const [status, setStatus] = useState<DeliveryStatus>('shipping');
-  const orders = getOrdersByStatus(status);
+  const [status, setStatus] = useState<OrderStatusFilter>('active');
+  const orderStore = useOrders();
+  const orders = orderStore.getOrdersByStatus(status);
 
   return (
     <Screen>
@@ -23,10 +25,14 @@ export default function OrdersPage() {
       <SegmentedControl
         options={orderStatusOptions}
         value={status}
-        onValueChange={(nextStatus) => setStatus(nextStatus as DeliveryStatus)}
+        onValueChange={(nextStatus) => setStatus(nextStatus as OrderStatusFilter)}
       />
 
-      {orders.length > 0 ? (
+      {!orderStore.isReady ? (
+        <Card style={styles.emptyState}>
+          <AppText color="textSecondary">주문을 불러오고 있어요</AppText>
+        </Card>
+      ) : orders.length > 0 ? (
         <View style={styles.orderList}>
           {orders.map((order) => (
             <Link
@@ -47,7 +53,7 @@ export default function OrdersPage() {
                     </AppText>
                   </View>
                   <AppText numberOfLines={2} variant="label">
-                    {order.items[0]?.productName}
+                    {formatOrderTitle(order.items)}
                   </AppText>
                   <View style={styles.orderFooter}>
                     <AppText color="textSecondary">{order.items.length}건</AppText>

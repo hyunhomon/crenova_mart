@@ -34,15 +34,22 @@ export function createMockOrders(products: Product[]): Order[] {
           id: 'order-item-002',
           productId: second.id,
           productName: second.name,
-          quantity: 2,
+          quantity: 1,
           unitPrice: second.price,
+        },
+        {
+          id: 'order-item-002-extra',
+          productId: third.id,
+          productName: third.name,
+          quantity: 2,
+          unitPrice: third.price,
         },
       ],
       orderNumber: 'FD-20260623-002',
       payment: {
         approvedAt: '2026-06-23T16:11:00+09:00',
         method: 'toss-payments-card',
-        totalAmount: second.price * 2 + second.delivery.fee,
+        totalAmount: second.price + third.price * 2 + second.delivery.fee + third.delivery.fee,
       },
       status: 'delivered',
     },
@@ -64,7 +71,7 @@ export function createMockOrders(products: Product[]): Order[] {
         method: 'toss-payments-transfer',
         totalAmount: third.price + third.delivery.fee,
       },
-      status: 'completed',
+      status: 'preparing',
     },
   ];
 }

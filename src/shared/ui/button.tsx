@@ -12,7 +12,7 @@ import { Radius, Spacing, ThemeColor } from '@/constants/theme';
 import { AppText } from '@/shared/ui/app-text';
 import { useTheme } from '@/hooks/use-theme';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive' | 'inverted';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 type ButtonProps = Omit<PressableProps, 'children' | 'style'> & {
@@ -32,12 +32,13 @@ const buttonTone: Record<
   secondary: { background: 'backgroundElement', border: 'backgroundElement', text: 'text' },
   ghost: { background: 'transparent', border: 'transparent', text: 'textSecondary' },
   destructive: { background: 'danger', border: 'danger', text: 'surface' },
+  inverted: { background: 'text', border: 'text', text: 'background' },
 };
 
 const sizeStyle: Record<ButtonSize, ViewStyle> = {
   sm: {
-    minHeight: 40,
-    paddingHorizontal: Spacing.four,
+    minHeight: 36,
+    paddingHorizontal: Spacing.three,
   },
   md: {
     minHeight: 48,
@@ -94,7 +95,7 @@ const styles = StyleSheet.create({
   root: {
     alignItems: 'center',
     borderCurve: 'continuous',
-    borderRadius: Radius.lg,
+    borderRadius: Radius.md,
     borderWidth: 1,
     flexDirection: 'row',
     gap: Spacing.two,

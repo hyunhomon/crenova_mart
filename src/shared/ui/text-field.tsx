@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { forwardRef, useState } from 'react';
 import {
   StyleSheet,
   TextInput,
@@ -8,7 +8,10 @@ import {
 import { Fonts, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-export function TextField({ onBlur, onFocus, style, ...props }: TextInputProps) {
+export const TextField = forwardRef<TextInput, TextInputProps>(function TextField(
+  { onBlur, onFocus, style, ...props },
+  ref
+) {
   const [focused, setFocused] = useState(false);
   const theme = useTheme();
 
@@ -24,6 +27,7 @@ export function TextField({ onBlur, onFocus, style, ...props }: TextInputProps) 
 
   return (
     <TextInput
+      ref={ref}
       placeholderTextColor={theme.textTertiary}
       selectionColor={theme.brand}
       style={[
@@ -40,18 +44,19 @@ export function TextField({ onBlur, onFocus, style, ...props }: TextInputProps) 
       {...props}
     />
   );
-}
+});
 
-export function SearchField(props: TextInputProps) {
+export const SearchField = forwardRef<TextInput, TextInputProps>(function SearchField(props, ref) {
   return (
     <TextField
+      ref={ref}
       autoCapitalize="none"
       returnKeyType="search"
       textContentType="none"
       {...props}
     />
   );
-}
+});
 
 const styles = StyleSheet.create({
   root: {

@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { useCart } from '@/features/cart/model';
 import { formatKRW } from '@/shared/lib';
@@ -14,7 +14,11 @@ export default function CartPage() {
     <Screen>
       <AppText variant="h1">장바구니</AppText>
 
-      {cart.items.length === 0 ? (
+      {!cart.isReady ? (
+        <Card style={styles.emptyState}>
+          <AppText color="textSecondary">장바구니를 불러오고 있어요</AppText>
+        </Card>
+      ) : cart.items.length === 0 ? (
         <Card style={styles.emptyState}>
           <AppText color="textSecondary">담은 상품이 없어요</AppText>
           <Button variant="secondary" onPress={() => router.replace('/')}>
@@ -25,40 +29,62 @@ export default function CartPage() {
         <>
           <View style={styles.list}>
             {cart.items.map((item) => (
-              <Card key={item.id} style={styles.cartItem}>
-                <Image contentFit="cover" source={item.product.imageUrl} style={styles.image} />
-                <View style={styles.itemCopy}>
-                  <AppText numberOfLines={2} variant="label">
-                    {item.product.name}
-                  </AppText>
-                  <AppText color="textSecondary" variant="caption">
-                    {item.product.options.find((option) => option.id === item.optionId)?.name}
-                  </AppText>
-                  <AppText variant="label">{formatKRW(item.unitPrice)}</AppText>
-                  <View style={styles.itemActions}>
-                    <View style={styles.quantityControl}>
+              <Pressable
+                key={item.id}
+                style={({ pressed }) => [pressed && styles.pressed]}
+                onPress={() =>
+                  router.push({
+                    pathname: '/product/[productId]',
+                    params: { productId: item.product.id },
+                  })
+                }>
+                <Card style={styles.cartItem}>
+                  <Image contentFit="cover" source={item.product.imageUrl} style={styles.image} />
+                  <View style={styles.itemCopy}>
+                    <AppText numberOfLines={2} variant="label">
+                      {item.product.name}
+                    </AppText>
+                    <AppText color="textSecondary" variant="caption">
+                      {item.product.options.find((option) => option.id === item.optionId)?.name}
+                    </AppText>
+                    <AppText variant="label">{formatKRW(item.unitPrice)}</AppText>
+                    <View style={styles.itemActions}>
+                      <View style={styles.quantityControl}>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onPress={(event) => {
+                            event.stopPropagation();
+                            cart.updateQuantity(item.id, item.quantity - 1);
+                          }}>
+                          -
+                        </Button>
+                        <AppText style={styles.quantityText} variant="label">
+                          {item.quantity}
+                        </AppText>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onPress={(event) => {
+                            event.stopPropagation();
+                            cart.updateQuantity(item.id, item.quantity + 1);
+                          }}>
+                          +
+                        </Button>
+                      </View>
                       <Button
                         size="sm"
-                        variant="secondary"
-                        onPress={() => cart.updateQuantity(item.id, item.quantity - 1)}>
-                        -
-                      </Button>
-                      <AppText style={styles.quantityText} variant="label">
-                        {item.quantity}
-                      </AppText>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onPress={() => cart.updateQuantity(item.id, item.quantity + 1)}>
-                        +
+                        variant="ghost"
+                        onPress={(event) => {
+                          event.stopPropagation();
+                          cart.removeItem(item.id);
+                        }}>
+                        삭제
                       </Button>
                     </View>
-                    <Button size="sm" variant="ghost" onPress={() => cart.removeItem(item.id)}>
-                      삭제
-                    </Button>
                   </View>
-                </View>
-              </Card>
+                </Card>
+              </Pressable>
             ))}
           </View>
 
@@ -91,7 +117,7 @@ function SummaryRow({ label, strong, value }: { label: string; strong?: boolean;
 
 const styles = StyleSheet.create({
   cartItem: {
-    alignItems: 'center',
+    alignItems: 'stretch',
     flexDirection: 'row',
     gap: Spacing.four,
   },
@@ -107,8 +133,8 @@ const styles = StyleSheet.create({
     padding: Spacing.six,
   },
   image: {
-    aspectRatio: 1,
     borderRadius: Radius.lg,
+    minHeight: 96,
     width: 88,
   },
   itemActions: {
@@ -122,6 +148,9 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: Spacing.three,
+  },
+  pressed: {
+    opacity: 0.72,
   },
   quantityControl: {
     alignItems: 'center',

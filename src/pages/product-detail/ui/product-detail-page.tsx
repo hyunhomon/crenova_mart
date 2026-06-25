@@ -1,30 +1,41 @@
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
+import { Check, ChevronDown } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { getProductById } from '@/entities/product';
+import { getProductById, getRelatedProducts } from '@/entities/product';
 import { ProductOption } from '@/entities/product/model/types';
+import { ProductCard } from '@/entities/product/ui';
 import { useCart } from '@/features/cart/model';
-import { formatKRW } from '@/shared/lib';
-import { AppText, Badge, Button, Card, Screen } from '@/shared/ui';
-import { Radius, Spacing } from '@/constants/theme';
+import { MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { formatKRW } from '@/shared/lib';
+import { AppText, Badge, Button, Card, DraggableScrollView, Screen } from '@/shared/ui';
+
+const PURCHASE_BAR_SPACE = 156;
 
 export default function ProductDetailPage() {
   const { productId } = useLocalSearchParams<{ productId: string }>();
   const product = getProductById(productId);
-  const [added, setAdded] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [selectedOptionId, setSelectedOptionId] = useState(product?.options[0]?.id);
   const cart = useCart();
+  const theme = useTheme();
 
   const selectedOption = useMemo(
-    () => product?.options.find((option) => option.id === selectedOptionId),
+    () => product?.options.find((option) => option.id === selectedOptionId) ?? product?.options[0],
     [product, selectedOptionId]
+  );
+  const relatedProducts = useMemo(
+    () => (product ? getRelatedProducts(product.id, 8) : []),
+    [product]
   );
   const unitPrice = product ? product.price + (selectedOption?.priceDelta ?? 0) : 0;
   const totalPrice = unitPrice * quantity;
+  const cartLine = cart.lines.find(
+    (line) => line.productId === product?.id && line.optionId === selectedOption?.id
+  );
 
   if (!product) {
     return (
@@ -37,6 +48,7 @@ export default function ProductDetailPage() {
     );
   }
 
+  const selectedOptionIdForCart = selectedOption?.id;
   const productIdForCart = product.id;
 
   function updateQuantity(nextQuantity: number) {
@@ -44,156 +56,284 @@ export default function ProductDetailPage() {
   }
 
   function handleBuyNow() {
-    if (!selectedOptionId) {
+    if (!selectedOptionIdForCart) {
       return;
     }
 
     cart.addItem({
-      optionId: selectedOptionId,
+      optionId: selectedOptionIdForCart,
       productId: productIdForCart,
       quantity,
     });
     router.push('/checkout');
   }
 
-  function handleAddToCart() {
-    if (!selectedOptionId) {
+  function handleToggleCart() {
+    if (!selectedOptionIdForCart) {
+      return;
+    }
+
+    if (cartLine) {
+      cart.removeItem(cartLine.id);
       return;
     }
 
     cart.addItem({
-      optionId: selectedOptionId,
+      optionId: selectedOptionIdForCart,
       productId: productIdForCart,
       quantity,
     });
-    setAdded(true);
   }
 
   return (
-    <Screen contentContainerStyle={styles.content}>
-      <Image contentFit="cover" source={product.imageUrl} style={styles.heroImage} />
+    <View style={[styles.root, { backgroundColor: theme.background }]}>
+      <Screen contentContainerStyle={[styles.content, { paddingBottom: PURCHASE_BAR_SPACE }]}>
+        <Image contentFit="cover" source={product.imageUrl} style={styles.heroImage} />
 
-      <View style={styles.summary}>
-        <View style={styles.artistRow}>
-          <Badge>{product.delivery.badgeLabel}</Badge>
-          <AppText color="textSecondary" variant="caption">
-            {product.artist}
+        <View style={styles.summary}>
+          <View style={styles.deliveryRow}>
+            <Badge>{product.delivery.badgeLabel}</Badge>
+          </View>
+          <AppText variant="h1">{product.name}</AppText>
+          <AppText color="textTertiary" variant="caption">
+            판매자 {product.artist}
           </AppText>
         </View>
-        <AppText variant="h1">{product.name}</AppText>
-        <AppText variant="title">{formatKRW(unitPrice)}</AppText>
-      </View>
 
-      <View style={styles.section}>
-        <AppText color="textSecondary" variant="label">
-          옵션
-        </AppText>
-        {product.options.map((option) => (
-          <OptionRow
-            key={option.id}
-            option={option}
-            selected={option.id === selectedOptionId}
-            onPress={() => setSelectedOptionId(option.id)}
+        <View style={styles.section}>
+          <AppText color="textSecondary" variant="label">
+            옵션
+          </AppText>
+          <OptionDropdown
+            options={product.options}
+            selectedOptionId={selectedOption?.id}
+            onSelect={setSelectedOptionId}
           />
-        ))}
-      </View>
-
-      <Card style={styles.quantityCard}>
-        <AppText variant="label">수량</AppText>
-        <View style={styles.quantityControl}>
-          <Button size="sm" variant="secondary" onPress={() => updateQuantity(quantity - 1)}>
-            -
-          </Button>
-          <AppText style={styles.quantityText} variant="label">
-            {quantity}
-          </AppText>
-          <Button size="sm" variant="secondary" onPress={() => updateQuantity(quantity + 1)}>
-            +
-          </Button>
         </View>
-      </Card>
 
-      <View style={styles.actionArea}>
-        {added && (
-          <AppText color="brand" style={styles.addedText} variant="caption">
-            장바구니에 담았어요
+        <View style={styles.section}>
+          <AppText color="textSecondary" variant="label">
+            상품 설명
           </AppText>
-        )}
-        <View style={styles.actions}>
-          <Button
-            style={styles.secondaryAction}
-            variant="secondary"
-            onPress={handleAddToCart}>
-            장바구니
-          </Button>
-          <Button fullWidth style={styles.primaryAction} onPress={handleBuyNow}>
-            {formatKRW(totalPrice)}
-          </Button>
+          <AppText color="textSecondary">{product.description}</AppText>
+        </View>
+
+        <View style={styles.section}>
+          <AppText color="textSecondary" variant="label">
+            배송비
+          </AppText>
+          <AppText style={styles.deliveryFeeValue} variant="title">
+            {formatDeliveryFee(product.delivery.fee)}
+          </AppText>
+        </View>
+
+        <View style={styles.section}>
+          <AppText color="textSecondary" variant="label">
+            다른 상품
+          </AppText>
+          <DraggableScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.relatedList}>
+            {relatedProducts.map((relatedProduct) => (
+              <ProductCard
+                key={relatedProduct.id}
+                product={relatedProduct}
+                style={styles.relatedCard}
+              />
+            ))}
+          </DraggableScrollView>
+        </View>
+      </Screen>
+
+      <View
+        style={[
+          styles.purchaseBar,
+          {
+            backgroundColor: theme.background,
+            borderTopColor: theme.line,
+          },
+        ]}>
+        <View style={styles.purchaseContent}>
+          <View style={styles.purchaseTopRow}>
+            <AppText color="textSecondary" variant="label">
+              수량
+            </AppText>
+            <View style={styles.quantityControl}>
+              <Button
+                disabled={quantity === 1}
+                size="sm"
+                variant="secondary"
+                onPress={() => updateQuantity(quantity - 1)}>
+                -
+              </Button>
+              <AppText style={styles.quantityText} variant="label">
+                {quantity}
+              </AppText>
+              <Button size="sm" variant="secondary" onPress={() => updateQuantity(quantity + 1)}>
+                +
+              </Button>
+            </View>
+          </View>
+          <View style={styles.actions}>
+            <Button
+              disabled={!cart.isReady}
+              style={styles.secondaryAction}
+              variant={cartLine ? 'destructive' : 'secondary'}
+              onPress={handleToggleCart}>
+              {cartLine ? '장바구니 빼기' : '장바구니 담기'}
+            </Button>
+            <Button
+              disabled={!cart.isReady}
+              fullWidth
+              style={styles.primaryAction}
+              variant="inverted"
+              onPress={handleBuyNow}>
+              {formatKRW(totalPrice)}
+            </Button>
+          </View>
         </View>
       </View>
-    </Screen>
+    </View>
   );
 }
 
-function OptionRow({
-  option,
-  onPress,
-  selected,
+function formatDeliveryFee(fee: number) {
+  return fee <= 0 ? '무료' : formatKRW(fee);
+}
+
+function OptionDropdown({
+  onSelect,
+  options,
+  selectedOptionId,
 }: {
-  option: ProductOption;
-  onPress: () => void;
-  selected: boolean;
+  onSelect: (optionId: string) => void;
+  options: ProductOption[];
+  selectedOptionId?: string;
 }) {
+  const [open, setOpen] = useState(false);
   const theme = useTheme();
+  const selectedOption = options.find((option) => option.id === selectedOptionId) ?? options[0];
 
   return (
-    <Pressable style={({ pressed }) => pressed && styles.pressed} onPress={onPress}>
-      <Card
-        style={[
-          styles.optionRow,
-          selected && {
-            borderColor: theme.brand,
-          },
-        ]}>
-        <AppText variant="label">{option.name}</AppText>
-        {option.priceDelta > 0 && (
-          <AppText color="textSecondary">{formatKRW(option.priceDelta)}</AppText>
-        )}
-      </Card>
-    </Pressable>
+    <View style={styles.dropdownRoot}>
+      <Pressable style={({ pressed }) => pressed && styles.pressed} onPress={() => setOpen(!open)}>
+        <Card
+          style={[
+            styles.optionTrigger,
+            open && {
+              borderColor: theme.lineStrong,
+            },
+          ]}
+          variant="muted">
+          <View>
+            <AppText variant="label">{selectedOption?.name ?? '옵션 선택'}</AppText>
+            {!!selectedOption?.priceDelta && (
+              <AppText color="textSecondary" variant="caption">
+                +{formatKRW(selectedOption.priceDelta)}
+              </AppText>
+            )}
+          </View>
+          <View style={[styles.dropdownIcon, open && styles.dropdownIconOpen]}>
+            <ChevronDown color={theme.textSecondary} size={18} strokeWidth={2.4} />
+          </View>
+        </Card>
+      </Pressable>
+
+      {open && (
+        <Card padded={false} style={styles.optionMenu} variant="muted">
+          {options.map((option, index) => {
+            const selected = option.id === selectedOption?.id;
+
+            return (
+              <Pressable
+                key={option.id}
+                style={({ pressed }) => [
+                  styles.optionMenuItem,
+                  index > 0 && {
+                    borderTopColor: theme.line,
+                    borderTopWidth: StyleSheet.hairlineWidth,
+                  },
+                  pressed && styles.pressed,
+                ]}
+                onPress={() => {
+                  onSelect(option.id);
+                  setOpen(false);
+                }}>
+                <View style={styles.optionMenuCopy}>
+                  <AppText variant="label">{option.name}</AppText>
+                  {option.priceDelta > 0 && (
+                    <AppText color="textSecondary" variant="caption">
+                      +{formatKRW(option.priceDelta)}
+                    </AppText>
+                  )}
+                </View>
+                {selected && <Check color={theme.text} size={16} strokeWidth={2.6} />}
+              </Pressable>
+            );
+          })}
+        </Card>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  actionArea: {
-    gap: Spacing.two,
-  },
   actions: {
-    flexDirection: 'row',
-    gap: Spacing.two,
-  },
-  addedText: {
-    textAlign: 'right',
-  },
-  artistRow: {
-    alignItems: 'center',
     flexDirection: 'row',
     gap: Spacing.two,
   },
   content: {
     gap: Spacing.six,
   },
+  deliveryRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  deliveryFeeValue: {
+    fontVariant: ['tabular-nums'],
+  },
+  dropdownIcon: {
+    alignItems: 'center',
+    height: 20,
+    justifyContent: 'center',
+    width: 20,
+  },
+  dropdownIconOpen: {
+    transform: [{ rotate: '180deg' }],
+  },
+  dropdownRoot: {
+    gap: Spacing.two,
+  },
   heroImage: {
     aspectRatio: 1,
     backgroundColor: '#ECE8FF',
     borderCurve: 'continuous',
-    borderRadius: Radius.xxxl,
+    borderRadius: Radius.md,
     width: '100%',
   },
-  optionRow: {
+  optionMenu: {
+    gap: 0,
+    overflow: 'hidden',
+  },
+  optionMenuCopy: {
+    flex: 1,
+    gap: Spacing.half,
+  },
+  optionMenuItem: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: Spacing.three,
+    justifyContent: 'space-between',
+    minHeight: 52,
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.three,
+  },
+  optionTrigger: {
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    minHeight: 56,
   },
   pressed: {
     opacity: 0.72,
@@ -201,7 +341,23 @@ const styles = StyleSheet.create({
   primaryAction: {
     flex: 1,
   },
-  quantityCard: {
+  purchaseBar: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    bottom: 0,
+    left: 0,
+    paddingTop: Spacing.three,
+    position: 'absolute',
+    right: 0,
+  },
+  purchaseContent: {
+    alignSelf: 'center',
+    gap: Spacing.two,
+    maxWidth: MaxContentWidth,
+    paddingBottom: Spacing.four,
+    paddingHorizontal: Spacing.six,
+    width: '100%',
+  },
+  purchaseTopRow: {
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -216,8 +372,18 @@ const styles = StyleSheet.create({
     minWidth: 28,
     textAlign: 'center',
   },
+  relatedCard: {
+    width: 128,
+  },
+  relatedList: {
+    gap: Spacing.three,
+    paddingRight: Spacing.six,
+  },
+  root: {
+    flex: 1,
+  },
   secondaryAction: {
-    minWidth: 104,
+    minWidth: 136,
   },
   section: {
     gap: Spacing.three,
