@@ -69,7 +69,7 @@ export async function requestTossCardPayment({
   const orderId = createOrderId();
   const origin = window.location.origin;
 
-  savePendingTossPayment({
+  await savePendingTossPayment({
     amount,
     items: items.map((item) => ({
       id: item.id,

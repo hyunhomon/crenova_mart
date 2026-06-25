@@ -1,30 +1,22 @@
 import { Order, OrderItem } from '@/entities/order';
+import { getPreference, removePreference, setPreference } from '@/shared/lib/storage';
 
 import { PendingTossPayment, TossPaymentSuccessParams } from './types';
 
 const pendingPaymentKey = 'fandom-and:pending-toss-payment';
-const paidOrderKey = 'fandom-and:last-paid-order';
 
-export function savePendingTossPayment(payment: PendingTossPayment) {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  window.sessionStorage.setItem(pendingPaymentKey, JSON.stringify(payment));
+export async function savePendingTossPayment(payment: PendingTossPayment) {
+  await setPreference(pendingPaymentKey, payment);
 }
 
-export function clearPendingTossPayment() {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  window.sessionStorage.removeItem(pendingPaymentKey);
+export async function clearPendingTossPayment() {
+  await removePreference(pendingPaymentKey);
 }
 
-export function resolveTossPaymentSuccess(params: TossPaymentSuccessParams) {
+export async function resolveTossPaymentSuccess(params: TossPaymentSuccessParams) {
   const amount = Number(params.amount);
   const expectedAmount = Number(params.expectedAmount);
-  const pendingPayment = getPendingTossPayment();
+  const pendingPayment = await getPendingTossPayment();
   const amountToVerify = pendingPayment?.amount ?? expectedAmount;
   const orderId = params.orderId;
   const paymentKey = params.paymentKey;
@@ -46,8 +38,7 @@ export function resolveTossPaymentSuccess(params: TossPaymentSuccessParams) {
     paymentKey,
   });
 
-  savePaidOrder(order);
-  clearPendingTossPayment();
+  await clearPendingTossPayment();
 
   return {
     isValid: true,
@@ -56,45 +47,7 @@ export function resolveTossPaymentSuccess(params: TossPaymentSuccessParams) {
 }
 
 function getPendingTossPayment() {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
-  const rawPayment = window.sessionStorage.getItem(pendingPaymentKey);
-  if (!rawPayment) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(rawPayment) as PendingTossPayment;
-  } catch {
-    return null;
-  }
-}
-
-function savePaidOrder(order: Order) {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  window.sessionStorage.setItem(paidOrderKey, JSON.stringify(order));
-}
-
-export function getStoredPaidOrder() {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
-  const rawOrder = window.sessionStorage.getItem(paidOrderKey);
-  if (!rawOrder) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(rawOrder) as Order;
-  } catch {
-    return null;
-  }
+  return getPreference<PendingTossPayment | null>(pendingPaymentKey, null);
 }
 
 function createPaidOrder({

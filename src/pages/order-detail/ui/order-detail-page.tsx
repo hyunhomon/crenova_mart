@@ -9,15 +9,24 @@ import {
   isDeliveryStatusReached,
 } from '@/entities/order';
 import { getProductById } from '@/entities/product';
-import { getOrderById, getStatusBadgeVariant } from '@/features/orders/model';
+import { getStatusBadgeVariant, useOrders } from '@/features/orders/model';
 import { formatKRW } from '@/shared/lib';
 import { Radius, Spacing } from '@/constants/theme';
 import { AppText, Badge, Button, Card, Screen } from '@/shared/ui';
 
 export default function OrderDetailPage() {
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
-  const order = getOrderById(orderId);
+  const orderStore = useOrders();
+  const order = orderStore.getOrderById(orderId);
   const status = order?.status;
+
+  if (!orderStore.isReady) {
+    return (
+      <Screen>
+        <AppText variant="h1">주문을 불러오고 있어요</AppText>
+      </Screen>
+    );
+  }
 
   if (!order || !status) {
     return (

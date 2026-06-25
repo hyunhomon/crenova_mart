@@ -1,25 +1,86 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { Order } from '@/entities/order';
+import { useCart } from '@/features/cart/model';
+import { useOrders } from '@/features/orders/model';
 import { resolveTossPaymentSuccess, TossPaymentSuccessParams } from '@/features/payment/toss/model';
+import { Spacing } from '@/constants/theme';
 import { formatKRW } from '@/shared/lib';
 import { AppText, Button, Card, Screen } from '@/shared/ui';
-import { Spacing } from '@/constants/theme';
+
+type PaymentResolution =
+  | {
+      isValid: false;
+      order: null;
+    }
+  | {
+      isValid: true;
+      order: Order;
+    };
+
+const copy = {
+  amount: '\uacb0\uc81c\uae08\uc561',
+  cart: '\uc7a5\ubc14\uad6c\ub2c8\ub85c',
+  checkingDescription: '\uacb0\uc81c \uc815\ubcf4\ub97c \ud655\uc778\ud558\uace0 \uc788\uc5b4\uc694',
+  checkingTitle: '\uacb0\uc81c \ud655\uc778 \uc911',
+  completeTitle: '\uacb0\uc81c \uc644\ub8cc',
+  invalidDescription: '\uae08\uc561\uc744 \ud655\uc778\ud558\uc9c0 \ubabb\ud588\uc5b4\uc694',
+  invalidTitle: '\uacb0\uc81c \ud655\uc778 \ud544\uc694',
+  orderNumber: '\uc8fc\ubb38\ubc88\ud638',
+  viewOrders: '\uc8fc\ubb38 \ubcf4\uae30',
+};
 
 export default function PaymentSuccessPage() {
   const params = useLocalSearchParams<TossPaymentSuccessParams>();
-  const result = useMemo(() => resolveTossPaymentSuccess(params), [params]);
+  const cart = useCart();
+  const orders = useOrders();
+  const [result, setResult] = useState<PaymentResolution | null>(null);
+  const hasResolvedRef = useRef(false);
+  const paramKey = useMemo(() => JSON.stringify(params), [params]);
+
+  useEffect(() => {
+    if (!cart.isReady || !orders.isReady || hasResolvedRef.current) {
+      return;
+    }
+
+    hasResolvedRef.current = true;
+
+    async function resolvePayment() {
+      const nextResult = await resolveTossPaymentSuccess(params);
+
+      if (nextResult.isValid && nextResult.order) {
+        await orders.addOrder(nextResult.order);
+        cart.clearCart();
+      }
+
+      setResult(nextResult as PaymentResolution);
+    }
+
+    void resolvePayment();
+  }, [cart, orders, paramKey, params]);
+
+  if (!result) {
+    return (
+      <Screen>
+        <AppText variant="h1">{copy.checkingTitle}</AppText>
+        <Card style={styles.section}>
+          <AppText color="textSecondary">{copy.checkingDescription}</AppText>
+        </Card>
+      </Screen>
+    );
+  }
 
   if (!result.isValid || !result.order) {
     return (
       <Screen>
-        <AppText variant="h1">결제 확인 필요</AppText>
+        <AppText variant="h1">{copy.invalidTitle}</AppText>
         <Card style={styles.section}>
-          <AppText color="textSecondary">금액을 확인하지 못했어요</AppText>
+          <AppText color="textSecondary">{copy.invalidDescription}</AppText>
         </Card>
         <Button variant="secondary" onPress={() => router.replace('/cart')}>
-          장바구니로
+          {copy.cart}
         </Button>
       </Screen>
     );
@@ -27,13 +88,13 @@ export default function PaymentSuccessPage() {
 
   return (
     <Screen>
-      <AppText variant="h1">결제 완료</AppText>
+      <AppText variant="h1">{copy.completeTitle}</AppText>
       <Card style={styles.section}>
-        <SummaryRow label="주문번호" value={result.order.orderNumber} />
-        <SummaryRow label="결제금액" value={formatKRW(result.order.payment.totalAmount)} />
+        <SummaryRow label={copy.orderNumber} value={result.order.orderNumber} />
+        <SummaryRow label={copy.amount} value={formatKRW(result.order.payment.totalAmount)} />
       </Card>
       <Button fullWidth size="lg" onPress={() => router.replace('/orders')}>
-        주문 보기
+        {copy.viewOrders}
       </Button>
     </Screen>
   );

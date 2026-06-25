@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   PanResponder,
@@ -16,6 +16,7 @@ import {
   searchProducts,
 } from '@/entities/product';
 import { ProductCard } from '@/entities/product/ui';
+import { saveSearchDraftQuery, saveSearchFilters } from '@/features/search/model';
 import { BottomTabInset, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { formatKRW } from '@/shared/lib';
@@ -104,6 +105,10 @@ export default function SearchDetailPage() {
     [closeFilters, sheetTranslateY]
   );
 
+  useEffect(() => {
+    void saveSearchDraftQuery(query);
+  }, [query]);
+
   function openFilters() {
     sheetTranslateY.setValue(0);
     setDraftCategory(category);
@@ -136,6 +141,11 @@ export default function SearchDetailPage() {
 
     setCategory(draftCategory);
     setPriceRange(nextPriceRange);
+    void saveSearchFilters({
+      category: draftCategory,
+      maxPrice: nextPriceRange.max,
+      minPrice: nextPriceRange.min,
+    });
     closeFilters();
     router.replace({
       pathname: '/search-detail/[category]',

@@ -1,7 +1,18 @@
-import { createContext, use, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  use,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 
 import { CartLine, buildCartItems, calculateCartSummary } from '@/entities/cart';
 import { mockProducts } from '@/entities/product';
+
+import { loadCartLines, saveCartLines } from './cart-repository';
 
 type AddCartItemInput = {
   optionId: string;
@@ -12,6 +23,7 @@ type AddCartItemInput = {
 type CartStore = {
   addItem: (input: AddCartItemInput) => void;
   clearCart: () => void;
+  isReady: boolean;
   items: ReturnType<typeof buildCartItems>;
   lines: CartLine[];
   removeItem: (lineId: string) => void;
@@ -20,25 +32,57 @@ type CartStore = {
 };
 
 const CartContext = createContext<CartStore | null>(null);
-let cartLinesState: CartLine[] = [];
 
 type CartProviderProps = {
   children: ReactNode;
 };
 
 export function CartProvider({ children }: CartProviderProps) {
-  const [lines, setLinesState] = useState<CartLine[]>(cartLinesState);
+  const [isReady, setIsReady] = useState(false);
+  const [lines, setLinesState] = useState<CartLine[]>([]);
+  const writeQueueRef = useRef(Promise.resolve());
   const items = useMemo(() => buildCartItems(lines, mockProducts), [lines]);
   const summary = useMemo(() => calculateCartSummary(items), [items]);
 
-  function setLines(updater: (currentLines: CartLine[]) => CartLine[]) {
+  useEffect(() => {
+    let mounted = true;
+
+    loadCartLines()
+      .then((storedLines) => {
+        if (mounted) {
+          setLinesState(storedLines);
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to load cart lines.', error);
+      })
+      .finally(() => {
+        if (mounted) {
+          setIsReady(true);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const persistLines = useCallback((nextLines: CartLine[]) => {
+    writeQueueRef.current = writeQueueRef.current
+      .then(() => saveCartLines(nextLines))
+      .catch((error) => {
+        console.error('Failed to save cart lines.', error);
+      });
+  }, []);
+
+  const setLines = useCallback((updater: (currentLines: CartLine[]) => CartLine[]) => {
     setLinesState((currentLines) => {
       const nextLines = updater(currentLines);
-      cartLinesState = nextLines;
+      persistLines(nextLines);
 
       return nextLines;
     });
-  }
+  }, [persistLines]);
 
   const store = useMemo<CartStore>(
     () => ({
@@ -73,6 +117,7 @@ export function CartProvider({ children }: CartProviderProps) {
       clearCart() {
         setLines(() => []);
       },
+      isReady,
       items,
       lines,
       removeItem(lineId) {
@@ -92,7 +137,7 @@ export function CartProvider({ children }: CartProviderProps) {
         );
       },
     }),
-    [items, lines, summary]
+    [isReady, items, lines, setLines, summary]
   );
 
   return <CartContext.Provider value={store}>{children}</CartContext.Provider>;

@@ -177,12 +177,18 @@ export default function ProductDetailPage() {
           </View>
           <View style={styles.actions}>
             <Button
+              disabled={!cart.isReady}
               style={styles.secondaryAction}
               variant={cartLine ? 'destructive' : 'secondary'}
               onPress={handleToggleCart}>
               {cartLine ? '장바구니 빼기' : '장바구니 담기'}
             </Button>
-            <Button fullWidth style={styles.primaryAction} variant="inverted" onPress={handleBuyNow}>
+            <Button
+              disabled={!cart.isReady}
+              fullWidth
+              style={styles.primaryAction}
+              variant="inverted"
+              onPress={handleBuyNow}>
               {formatKRW(totalPrice)}
             </Button>
           </View>

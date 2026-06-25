@@ -14,7 +14,11 @@ export default function CartPage() {
     <Screen>
       <AppText variant="h1">장바구니</AppText>
 
-      {cart.items.length === 0 ? (
+      {!cart.isReady ? (
+        <Card style={styles.emptyState}>
+          <AppText color="textSecondary">장바구니를 불러오고 있어요</AppText>
+        </Card>
+      ) : cart.items.length === 0 ? (
         <Card style={styles.emptyState}>
           <AppText color="textSecondary">담은 상품이 없어요</AppText>
           <Button variant="secondary" onPress={() => router.replace('/')}>

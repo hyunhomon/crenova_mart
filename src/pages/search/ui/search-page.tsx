@@ -1,5 +1,5 @@
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, useWindowDimensions, View, type TextInput } from 'react-native';
 
 import {
@@ -9,10 +9,15 @@ import {
   searchProducts,
 } from '@/entities/product';
 import { ProductCard } from '@/entities/product/ui';
+import {
+  addRecentSearch,
+  defaultRecentSearches,
+  loadSearchPreferences,
+  saveSearchDraftQuery,
+} from '@/features/search/model';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { AppText, Button, Screen, SearchField } from '@/shared/ui';
 
-const recentSearches = ['응원봉', '포토카드', '후드'];
 const GRID_GAP = Spacing.three;
 const RECOMMENDED_PRODUCT_LIMIT = 12;
 const SCREEN_PADDING = Spacing.six;
@@ -20,7 +25,8 @@ const SCREEN_PADDING = Spacing.six;
 export default function SearchPage() {
   const params = useLocalSearchParams<{ focus?: string; query?: string }>();
   const { width } = useWindowDimensions();
-  const query = params.query ?? '';
+  const [query, setQuery] = useState(params.query ?? '');
+  const [recentSearches, setRecentSearches] = useState(defaultRecentSearches);
   const searchInputRef = useRef<TextInput>(null);
   const products = useMemo(
     () => searchProducts({ category: 'all', query: '' }).slice(0, RECOMMENDED_PRODUCT_LIMIT),
@@ -43,7 +49,47 @@ export default function SearchPage() {
     }, [params.focus])
   );
 
-  function openSearchDetail(nextCategory: ProductCategory, nextQuery = query) {
+  useEffect(() => {
+    let mounted = true;
+
+    loadSearchPreferences()
+      .then((preferences) => {
+        if (!mounted) {
+          return;
+        }
+
+        setRecentSearches(preferences.recentSearches);
+
+        if (!params.query) {
+          setQuery(preferences.draftQuery);
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to load search preferences.', error);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [params.query]);
+
+  useEffect(() => {
+    if (params.query === undefined) {
+      return;
+    }
+
+    const frameId = requestAnimationFrame(() => {
+      setQuery(params.query ?? '');
+    });
+
+    return () => {
+      cancelAnimationFrame(frameId);
+    };
+  }, [params.query]);
+
+  async function openSearchDetail(nextCategory: ProductCategory, nextQuery = query) {
+    await recordSearch(nextQuery);
+
     router.push({
       pathname: '/search-detail/[category]',
       params: {
@@ -54,7 +100,15 @@ export default function SearchPage() {
   }
 
   function updateQuery(nextQuery: string) {
+    setQuery(nextQuery);
     router.setParams({ query: nextQuery });
+    void saveSearchDraftQuery(nextQuery);
+  }
+
+  async function recordSearch(nextQuery: string) {
+    const preferences = await addRecentSearch(nextQuery);
+
+    setRecentSearches(preferences.recentSearches);
   }
 
   return (
@@ -93,11 +147,7 @@ export default function SearchPage() {
         </AppText>
         <View style={styles.chipRow}>
           {productCategories.map((item) => (
-            <Button
-              key={item}
-              size="sm"
-              variant="ghost"
-              onPress={() => openSearchDetail(item)}>
+            <Button key={item} size="sm" variant="ghost" onPress={() => openSearchDetail(item)}>
               {categoryLabels[item]}
             </Button>
           ))}

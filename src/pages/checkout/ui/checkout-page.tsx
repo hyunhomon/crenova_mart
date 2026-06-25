@@ -25,6 +25,17 @@ export default function CheckoutPage() {
   const [paymentError, setPaymentError] = useState('');
   const [isPaymentLoading, setPaymentLoading] = useState(false);
 
+  if (!cart.isReady) {
+    return (
+      <Screen>
+        <AppText variant="h1">주문서</AppText>
+        <Card style={styles.emptyState}>
+          <AppText color="textSecondary">장바구니를 불러오고 있어요</AppText>
+        </Card>
+      </Screen>
+    );
+  }
+
   if (cart.items.length === 0) {
     return (
       <Screen>
