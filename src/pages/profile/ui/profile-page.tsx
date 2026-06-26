@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import {
   FileText,
   Headphones,
@@ -9,6 +9,7 @@ import {
 } from 'lucide-react-native';
 
 import { Radius, Spacing } from '@/constants/theme';
+import { useAuth } from '@/features/auth/model';
 import { useCart } from '@/features/cart/model';
 import { useOrders } from '@/features/orders/model';
 import { useTheme } from '@/hooks/use-theme';
@@ -33,6 +34,7 @@ const businessFooterLines = [
 ] as const;
 
 export default function ProfilePage() {
+  const auth = useAuth();
   const theme = useTheme();
   const cart = useCart();
   const orders = useOrders();
@@ -46,10 +48,10 @@ export default function ProfilePage() {
     <Screen contentContainerStyle={styles.content}>
       <Card padded={false} style={styles.identityCard} variant="ghost">
         <AppText style={styles.email} variant="title">
-          mail@example.com
+          {auth.session?.email ?? 'mail@example.com'}
         </AppText>
         <AppText color="textSecondary" variant="caption">
-          서울시 강남구 테헤란로
+          {auth.session?.address ?? '서울시 강남구 테헤란로'}
         </AppText>
       </Card>
 
@@ -62,7 +64,9 @@ export default function ProfilePage() {
             <AppText color="textSecondary" variant="caption">
               {label}
             </AppText>
-            {index < stats.length - 1 && <View style={styles.statDivider} />}
+            {index < stats.length - 1 && (
+              <View style={[styles.statDivider, { backgroundColor: theme.line }]} />
+            )}
           </View>
         ))}
       </Card>
@@ -80,12 +84,19 @@ export default function ProfilePage() {
 
       <Card style={styles.menuCard} variant="muted">
         {accountRows.map(({ icon: Icon, label }) => (
-          <View key={label} style={styles.menuRow}>
+          <Pressable
+            key={label}
+            style={({ pressed }) => [styles.menuRow, pressed && styles.pressed]}
+            onPress={() => {
+              if (label === '로그아웃') {
+                void auth.signOut();
+              }
+            }}>
             <Icon color={theme.textTertiary} size={17} strokeWidth={2.3} />
             <AppText color="textSecondary" variant="label">
               {label}
             </AppText>
-          </View>
+          </Pressable>
         ))}
       </Card>
 
@@ -126,8 +137,10 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
     minHeight: 24,
   },
+  pressed: {
+    opacity: 0.72,
+  },
   statDivider: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
     bottom: Spacing.two,
     position: 'absolute',
     right: 0,

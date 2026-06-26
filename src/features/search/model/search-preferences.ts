@@ -5,7 +5,6 @@ const SEARCH_PREFERENCES_KEY = 'fandom-and:search-preferences';
 const RECENT_SEARCH_LIMIT = 10;
 
 export type SearchPreferences = {
-  draftQuery: string;
   filters: {
     category: ProductCategory;
     maxPrice?: number;
@@ -17,24 +16,19 @@ export type SearchPreferences = {
 export const defaultRecentSearches = ['응원봉', '포토카드', '후드'];
 
 const defaultSearchPreferences: SearchPreferences = {
-  draftQuery: '',
   filters: {
     category: 'all',
   },
   recentSearches: defaultRecentSearches,
 };
 
-export function loadSearchPreferences() {
-  return getPreference<SearchPreferences>(SEARCH_PREFERENCES_KEY, defaultSearchPreferences);
-}
+export async function loadSearchPreferences() {
+  const preferences = await getPreference<Partial<SearchPreferences>>(
+    SEARCH_PREFERENCES_KEY,
+    defaultSearchPreferences
+  );
 
-export async function saveSearchDraftQuery(query: string) {
-  const preferences = await loadSearchPreferences();
-
-  await saveSearchPreferences({
-    ...preferences,
-    draftQuery: query,
-  });
+  return normalizeSearchPreferences(preferences);
 }
 
 export async function saveSearchFilters(filters: SearchPreferences['filters']) {
@@ -60,7 +54,6 @@ export async function addRecentSearch(query: string) {
   ].slice(0, RECENT_SEARCH_LIMIT);
   const nextPreferences = {
     ...preferences,
-    draftQuery: normalizedQuery,
     recentSearches,
   };
 
@@ -71,4 +64,18 @@ export async function addRecentSearch(query: string) {
 
 function saveSearchPreferences(preferences: SearchPreferences) {
   return setPreference(SEARCH_PREFERENCES_KEY, preferences);
+}
+
+function normalizeSearchPreferences(preferences: Partial<SearchPreferences>): SearchPreferences {
+  return {
+    filters: {
+      category: preferences.filters?.category ?? defaultSearchPreferences.filters.category,
+      maxPrice: preferences.filters?.maxPrice,
+      minPrice: preferences.filters?.minPrice,
+    },
+    recentSearches:
+      preferences.recentSearches && preferences.recentSearches.length > 0
+        ? preferences.recentSearches
+        : defaultRecentSearches,
+  };
 }

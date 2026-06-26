@@ -11,7 +11,7 @@ import {
 } from '@/entities/product';
 import { ProductCard } from '@/entities/product/ui';
 import { Fonts, MaxContentWidth, Spacing } from '@/constants/theme';
-import { AppText, Button, DraggableScrollView, IconButton, Screen } from '@/shared/ui';
+import { BrandLogo, Button, DraggableScrollView, IconButton, Screen } from '@/shared/ui';
 
 const GRID_GAP = Spacing.three;
 const SCREEN_PADDING = Spacing.six;
@@ -28,7 +28,7 @@ export default function HomePage() {
   return (
     <Screen preserveScroll contentContainerStyle={styles.content}>
       <View style={styles.topBar}>
-        <AppText variant="h1">팬덤&</AppText>
+        <BrandLogo />
         <IconButton
           accessibilityLabel="알림"
           icon={Bell}

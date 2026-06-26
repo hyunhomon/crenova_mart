@@ -12,10 +12,12 @@ import { getProductById } from '@/entities/product';
 import { getStatusBadgeVariant, useOrders } from '@/features/orders/model';
 import { formatKRW } from '@/shared/lib';
 import { Radius, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { AppText, Badge, Button, Card, Screen } from '@/shared/ui';
 
 export default function OrderDetailPage() {
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
+  const theme = useTheme();
   const orderStore = useOrders();
   const order = orderStore.getOrderById(orderId);
   const status = order?.status;
@@ -59,8 +61,9 @@ export default function OrderDetailPage() {
                 <View
                   style={[
                     styles.timelineDot,
-                    reached && styles.timelineDotReached,
-                    current && styles.timelineDotActive,
+                    { backgroundColor: theme.backgroundSelected },
+                    reached && { backgroundColor: theme.textTertiary },
+                    current && { backgroundColor: theme.brand },
                   ]}
                 />
                 <AppText
@@ -155,16 +158,9 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   timelineDot: {
-    backgroundColor: '#D9DCE3',
     borderRadius: Radius.full,
     height: 10,
     width: 10,
-  },
-  timelineDotActive: {
-    backgroundColor: '#6D3DFF',
-  },
-  timelineDotReached: {
-    backgroundColor: '#8A909C',
   },
   timelineRow: {
     alignItems: 'center',

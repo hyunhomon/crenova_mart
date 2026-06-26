@@ -12,6 +12,7 @@ import { Product } from '@/entities/product/model/types';
 import { formatKRW } from '@/shared/lib';
 import { AppText, Card, CardContent } from '@/shared/ui';
 import { Radius, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
 type ProductCardProps = {
   product: Product;
@@ -19,6 +20,8 @@ type ProductCardProps = {
 };
 
 export function ProductCard({ product, style }: ProductCardProps) {
+  const theme = useTheme();
+
   return (
     <View style={style}>
       <Link
@@ -26,7 +29,11 @@ export function ProductCard({ product, style }: ProductCardProps) {
         href={`/product/${encodeURIComponent(product.id)}` as never}>
         <Pressable style={({ pressed }) => [styles.root, pressed && styles.pressed]}>
           <Card padded={false} style={styles.card} variant="ghost">
-            <Image contentFit="cover" source={product.imageUrl} style={styles.image} />
+            <Image
+              contentFit="cover"
+              source={product.imageUrl}
+              style={[styles.image, { backgroundColor: theme.brandWeak }]}
+            />
             <CardContent style={styles.copy}>
               <AppText numberOfLines={2} variant="caption">
                 {product.name}
@@ -51,7 +58,6 @@ const styles = StyleSheet.create({
   },
   image: {
     aspectRatio: 0.74,
-    backgroundColor: '#ECE8FF',
     borderCurve: 'continuous',
     borderRadius: Radius.sm,
     width: '100%',

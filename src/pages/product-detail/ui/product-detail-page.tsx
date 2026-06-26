@@ -94,7 +94,11 @@ export default function ProductDetailPage() {
           styles.content,
           { paddingBottom: PURCHASE_BAR_SPACE + insets.bottom },
         ]}>
-        <Image contentFit="cover" source={product.imageUrl} style={styles.heroImage} />
+        <Image
+          contentFit="cover"
+          source={product.imageUrl}
+          style={[styles.heroImage, { backgroundColor: theme.brandWeak }]}
+        />
 
         <View style={styles.summary}>
           <View style={styles.deliveryRow}>
@@ -313,7 +317,6 @@ const styles = StyleSheet.create({
   },
   heroImage: {
     aspectRatio: 1,
-    backgroundColor: '#ECE8FF',
     borderCurve: 'continuous',
     borderRadius: Radius.md,
     width: '100%',
