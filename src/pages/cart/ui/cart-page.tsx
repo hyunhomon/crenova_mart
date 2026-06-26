@@ -5,10 +5,12 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useCart } from '@/features/cart/model';
 import { formatKRW } from '@/shared/lib';
 import { Radius, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { AppText, Button, Card, Screen } from '@/shared/ui';
 
 export default function CartPage() {
   const cart = useCart();
+  const theme = useTheme();
 
   return (
     <Screen>
@@ -88,7 +90,7 @@ export default function CartPage() {
           <Card style={styles.summary}>
             <SummaryRow label="상품금액" value={formatKRW(cart.summary.subtotal)} />
             <SummaryRow label="배송비" value={formatKRW(cart.summary.deliveryFee)} />
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: theme.line }]} />
             <SummaryRow strong label="총 결제금액" value={formatKRW(cart.summary.total)} />
           </Card>
 
@@ -119,7 +121,6 @@ const styles = StyleSheet.create({
     gap: Spacing.four,
   },
   divider: {
-    backgroundColor: 'rgba(138, 144, 156, 0.24)',
     height: 1,
   },
   emptyState: {

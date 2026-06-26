@@ -16,7 +16,7 @@ import {
   searchProducts,
 } from '@/entities/product';
 import { ProductCard } from '@/entities/product/ui';
-import { saveSearchDraftQuery, saveSearchFilters } from '@/features/search/model';
+import { saveSearchFilters, setSearchDraftQuery } from '@/features/search/model';
 import { Fonts, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { formatKRW } from '@/shared/lib';
@@ -106,7 +106,7 @@ export default function SearchDetailPage() {
   );
 
   useEffect(() => {
-    void saveSearchDraftQuery(query);
+    setSearchDraftQuery(query);
   }, [query]);
 
   function openFilters() {

@@ -1,5 +1,6 @@
 export { AppText } from './app-text';
 export { Badge } from './badge';
+export { BrandLogo } from './brand-logo';
 export { Button } from './button';
 export { Card, CardContent, CardFooter, CardHeader } from './card';
 export { DraggableScrollView } from './draggable-scroll-view';

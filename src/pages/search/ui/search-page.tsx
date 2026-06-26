@@ -12,8 +12,9 @@ import { ProductCard } from '@/entities/product/ui';
 import {
   addRecentSearch,
   defaultRecentSearches,
+  getSearchDraftQuery,
   loadSearchPreferences,
-  saveSearchDraftQuery,
+  setSearchDraftQuery,
 } from '@/features/search/model';
 import { Fonts, MaxContentWidth, Spacing } from '@/constants/theme';
 import { AppText, Button, Screen, SearchField } from '@/shared/ui';
@@ -61,7 +62,7 @@ export default function SearchPage() {
         setRecentSearches(preferences.recentSearches);
 
         if (!params.query) {
-          setQuery(preferences.draftQuery);
+          setQuery(getSearchDraftQuery());
         }
       })
       .catch((error) => {
@@ -89,7 +90,7 @@ export default function SearchPage() {
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      void saveSearchDraftQuery(query);
+      setSearchDraftQuery(query);
     }, 250);
 
     return () => {
@@ -134,7 +135,8 @@ export default function SearchPage() {
             <Button
               key={keyword}
               size="sm"
-              variant="ghost"
+              textStyle={styles.categoryChipText}
+              variant="secondary"
               onPress={() => {
                 updateQuery(keyword);
                 openSearchDetail('all', keyword);

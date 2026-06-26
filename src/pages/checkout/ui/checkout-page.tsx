@@ -9,6 +9,7 @@ import {
 } from '@/features/payment/mock/model';
 import { formatKRW } from '@/shared/lib';
 import { Radius, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { AppText, Button, Card, Screen } from '@/shared/ui';
 
 const shippingAddress = {
@@ -20,6 +21,7 @@ const shippingAddress = {
 
 export default function CheckoutPage() {
   const cart = useCart();
+  const theme = useTheme();
 
   if (!cart.isReady) {
     return (
@@ -90,7 +92,7 @@ export default function CheckoutPage() {
       <Card style={styles.section}>
         <SummaryRow label="상품금액" value={formatKRW(cart.summary.subtotal)} />
         <SummaryRow label="배송비" value={formatKRW(cart.summary.deliveryFee)} />
-        <View style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: theme.line }]} />
         <SummaryRow strong label="결제금액" value={formatKRW(cart.summary.total)} />
       </Card>
 
@@ -117,7 +119,6 @@ const styles = StyleSheet.create({
     gap: Spacing.one,
   },
   divider: {
-    backgroundColor: 'rgba(138, 144, 156, 0.24)',
     height: 1,
   },
   emptyState: {

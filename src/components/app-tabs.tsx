@@ -1,10 +1,10 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 
-import { Colors } from '@/constants/theme';
 import { useCart } from '@/features/cart/model';
+import { useTheme } from '@/hooks/use-theme';
 
 export default function AppTabs() {
-  const colors = Colors.dark;
+  const colors = useTheme();
   const cart = useCart();
 
   return (
